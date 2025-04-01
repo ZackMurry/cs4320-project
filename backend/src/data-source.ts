@@ -1,4 +1,8 @@
 import { DataSource } from 'typeorm'
+import { iFINANCEUser } from './entity/iFINANCEUser.js'
+import { Administrator } from './entity/Administrator.js'
+import { NonAdminUser } from './entity/NonAdminUser.js'
+import { UserPassword } from './entity/UserPassword.js'
 
 console.log('Initializing data source...')
 
@@ -10,10 +14,10 @@ export const db = new DataSource({
   port: 5432,
   username: 'postgres',
   password: 'greSQLdb',
-  database: 'Group14_iFINANCEDB',
+  database: 'group14_ifinancedb',
   synchronize: true,
   logging: true,
-  entities: [],
+  entities: [iFINANCEUser, Administrator, NonAdminUser, UserPassword],
   subscribers: [],
   migrations: [],
 })

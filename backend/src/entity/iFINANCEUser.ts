@@ -8,9 +8,20 @@ import {
 } from 'typeorm'
 import { UserPassword } from './UserPassword.js'
 
+export enum EUserType {
+  USER = 'USER',
+  ADMIN = 'ADMIN',
+}
+
+export interface IUser {
+  ID: number
+  name: string
+  password: UserPassword
+}
+
 @Entity()
-@TableInheritance({})
-export class iFINANCEUser {
+@TableInheritance({ column: 'type' })
+export class iFINANCEUser implements IUser {
   @PrimaryGeneratedColumn()
   ID: number
 
@@ -22,4 +33,7 @@ export class iFINANCEUser {
   })
   @JoinColumn()
   password: UserPassword
+
+  @Column({ type: 'enum', enum: EUserType })
+  type: EUserType
 }

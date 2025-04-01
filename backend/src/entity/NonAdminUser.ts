@@ -8,7 +8,6 @@ import {
   PrimaryColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm'
-import { Administrator } from './Administrator.js'
 import { iFINANCEUser } from './iFINANCEUser.js'
 
 @Entity()

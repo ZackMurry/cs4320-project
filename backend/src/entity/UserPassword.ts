@@ -5,7 +5,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm'
-import { iFINANCEUser } from './iFINANCEUser.js'
+import { iFINANCEUser, IUser } from './iFINANCEUser.js'
 
 @Entity()
 export class UserPassword {
@@ -25,5 +25,5 @@ export class UserPassword {
   userAccountExpiryDate: Date
 
   @OneToOne('iFINANCEUser', (user: iFINANCEUser) => user.password)
-  user: iFINANCEUser
+  user: IUser
 }

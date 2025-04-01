@@ -4,6 +4,7 @@ import { UserPassword } from '../entity/UserPassword.js'
 import { NonAdminUser } from '../entity/NonAdminUser.js'
 import * as bcrypt from 'bcrypt'
 import { iFINANCEUser } from '../entity/iFINANCEUser.js'
+import withAuth from '../middleware/withAuth.js'
 
 const router = express.Router()
 
@@ -34,7 +35,7 @@ router.post('/', async (req, res) => {
   const user = new NonAdminUser()
   user.name = name
   user.address = address
-  user.email = user.email
+  user.email = email
   user.password = new UserPassword()
   user.password.encryptedPassword = await bcrypt.hash(
     password,
@@ -50,14 +51,14 @@ router.post('/', async (req, res) => {
   await userRepository.save(user)
 })
 
-router.post('/api/v1/login', async (req, res) => {
+router.post('/login', async (req, res) => {
   const username = req.body.username
   const password = req.body.password
 
   if (username === 'admin' && password === 'admin') {
     // Temp login code
     req.session.profile = { ID: 0, username: 'admin' }
-    res.sendStatus(200)
+    res.redirect('/admin')
   } else {
     res.sendStatus(400)
   }
@@ -66,12 +67,12 @@ router.post('/api/v1/login', async (req, res) => {
 router.get('/me', withAuth, async (req, res) => {
   console.log('GET /api/v1/users/me')
   console.log(req.session.profile)
-  const email = req.session.profile?.email
-  if (!email) {
+  const username = req.session.profile?.username
+  if (!username) {
     res.status(500).send()
     return
   }
-  res.json({ email })
+  res.json({ username })
 })
 
 export default router
