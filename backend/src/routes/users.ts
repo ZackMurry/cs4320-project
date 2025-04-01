@@ -12,7 +12,7 @@ const passwordRepository = db.getRepository(UserPassword)
 
 const bcryptSaltRounds = 10
 
-router.post('/api/v1/users', async (req, res) => {
+router.post('/', async (req, res) => {
   if (req.session.profile?.username !== 'admin') {
     res.sendStatus(403) // Only the admin user is authorized
     return
