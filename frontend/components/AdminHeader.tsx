@@ -1,5 +1,5 @@
-import { Button, DropdownMenu, IconButton } from '@radix-ui/themes'
-import { CircleUser, ShieldUser } from 'lucide-react'
+import { DropdownMenu, IconButton } from '@radix-ui/themes'
+import { ShieldUser } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
 
@@ -10,7 +10,7 @@ const AdminHeader: React.FC = () => {
         {/* Logo */}
         <div className='text-2xl font-bold'>
           <h1>
-            <Link href='/'>iFINANCE Admin Portal</Link>
+            <Link href='/admin'>iFINANCE Admin Portal</Link>
           </h1>
         </div>
 

@@ -16,7 +16,7 @@ export enum EUserType {
 export interface IUser {
   ID: number
   name: string
-  password: UserPassword
+  password: UserPassword | null
 }
 
 @Entity()
@@ -30,9 +30,11 @@ export class iFINANCEUser implements IUser {
 
   @OneToOne('UserPassword', (password: UserPassword) => password.user, {
     cascade: true,
+    onDelete: 'CASCADE',
+    nullable: true,
   })
   @JoinColumn()
-  password: UserPassword
+  password: UserPassword | null
 
   @Column({ type: 'enum', enum: EUserType })
   type: EUserType

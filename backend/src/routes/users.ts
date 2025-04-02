@@ -3,13 +3,16 @@ import db from '../data-source.js'
 import { UserPassword } from '../entity/UserPassword.js'
 import { NonAdminUser } from '../entity/NonAdminUser.js'
 import * as bcrypt from 'bcrypt'
-import { iFINANCEUser } from '../entity/iFINANCEUser.js'
+import { EUserType, iFINANCEUser } from '../entity/iFINANCEUser.js'
 import withAuth from '../middleware/withAuth.js'
+import { Administrator } from '../entity/Administrator.js'
 
 const router = express.Router()
 
 const userRepository = db.getRepository(iFINANCEUser)
 const passwordRepository = db.getRepository(UserPassword)
+const nonAdminRepostitory = db.getRepository(NonAdminUser)
+const adminRepository = db.getRepository(Administrator)
 
 const bcryptSaltRounds = 10
 
@@ -18,6 +21,12 @@ router.post('/', async (req, res) => {
     res.sendStatus(403) // Only the admin user is authorized
     return
   }
+  const adminID = req.session.profile?.ID
+  if (adminID === undefined || adminID === null) {
+    res.sendStatus(403)
+    return
+  }
+  console.log(req.body)
   const username = req.body.username
   const password = req.body.password
   const name = req.body.name
@@ -37,6 +46,15 @@ router.post('/', async (req, res) => {
   user.address = address
   user.email = email
   user.password = new UserPassword()
+
+  const admin = await adminRepository.findOneBy({ ID: adminID })
+  if (!admin) {
+    res.sendStatus(403)
+    return
+  }
+  user.administrator = admin
+
+  user.type = EUserType.USER
   user.password.encryptedPassword = await bcrypt.hash(
     password,
     bcryptSaltRounds,
@@ -49,6 +67,23 @@ router.post('/', async (req, res) => {
   accountExpiryDate.setFullYear(accountExpiryDate.getFullYear() + 10)
   user.password.userAccountExpiryDate = accountExpiryDate // Expire in 10 years
   await userRepository.save(user)
+  res.sendStatus(200)
+})
+
+router.get('/', async (req, res) => {
+  console.log(req.session.profile)
+  if (req.session.profile?.username !== 'admin') {
+    // todo: allow changing admin name and multiple admins
+    res.sendStatus(403) // Only the admin user is authorized
+    return
+  }
+  const adminID = req.session.profile?.ID
+  if (adminID === undefined || adminID === null) {
+    res.sendStatus(403)
+    return
+  }
+  const users = nonAdminRepostitory.findBy({ administrator: { ID: adminID } })
+  res.json(users)
 })
 
 router.post('/login', async (req, res) => {
@@ -57,11 +92,89 @@ router.post('/login', async (req, res) => {
 
   if (username === 'admin' && password === 'admin') {
     // Temp login code
-    req.session.profile = { ID: 0, username: 'admin' }
+    let passwordEntity = await passwordRepository.findOne({
+      where: {
+        userName: username,
+      },
+    })
+    if (!passwordEntity) {
+      // Create new admin if none exist
+      const numAdmins = await adminRepository.count({
+        where: { type: EUserType.ADMIN },
+      })
+      console.log('num admins', numAdmins)
+      if (numAdmins > 0) {
+        res.sendStatus(400)
+        return
+      }
+      let adminEntity = new Administrator()
+      adminEntity.dateHired = new Date().toDateString()
+      adminEntity.dateFinished = null
+      adminEntity.name = 'Administrator'
+      adminEntity.type = EUserType.ADMIN
+      adminEntity = await adminRepository.save(adminEntity)
+
+      let pass = new UserPassword()
+      pass.encryptedPassword = await bcrypt.hash(password, bcryptSaltRounds)
+      pass.userName = username
+      pass = await passwordRepository.save(pass)
+
+      adminEntity.password = pass
+      await adminRepository.save(adminEntity)
+    }
+    const adminEntity = await adminRepository.findOne({
+      where: {
+        password: {
+          userName: username,
+        },
+      },
+      relations: ['password'],
+    })
+    if (!adminEntity || !adminEntity.password) {
+      res.sendStatus(400)
+      return
+    }
+    const matches = await bcrypt.compare(
+      password,
+      adminEntity.password.encryptedPassword,
+    )
+    console.log('matches', matches)
+    if (!matches) {
+      res.sendStatus(400)
+      return
+    }
+    req.session.profile = {
+      ID: adminEntity.ID,
+      username: adminEntity.password.userName,
+    }
     res.redirect('/admin')
-  } else {
-    res.sendStatus(400)
+    return
   }
+  const passEntity = await passwordRepository.findOneBy({ userName: username })
+  console.log(passEntity)
+  if (!passEntity) {
+    res.sendStatus(400)
+    return
+  }
+  let userID = (
+    await adminRepository.findOneBy({
+      password: { ID: passEntity.ID },
+    })
+  )?.ID
+  if (!userID) {
+    userID = (
+      await userRepository.findOneBy({
+        password: { ID: passEntity.ID },
+      })
+    )?.ID
+  }
+  if (!userID) {
+    res.sendStatus(400)
+    return
+  }
+
+  console.log(userID)
+  res.sendStatus(400)
 })
 
 router.get('/me', withAuth, async (req, res) => {

@@ -8,10 +8,15 @@ import {
   PrimaryColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm'
-import { iFINANCEUser } from './iFINANCEUser.js'
+import { iFINANCEUser, IUser } from './iFINANCEUser.js'
+
+export interface IAdministrator extends IUser {
+  dateHired: string | null
+  dateFinished: string | null
+}
 
 @Entity()
-export class Administrator extends iFINANCEUser {
+export class Administrator extends iFINANCEUser implements IAdministrator {
   @Column({ type: 'date', nullable: true })
   dateHired: string | null
 

@@ -9,6 +9,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm'
 import { iFINANCEUser } from './iFINANCEUser.js'
+import { Administrator, IAdministrator } from './Administrator.js'
 
 @Entity()
 export class NonAdminUser extends iFINANCEUser {
@@ -19,5 +20,5 @@ export class NonAdminUser extends iFINANCEUser {
   email: string | null
 
   @ManyToOne('Administrator')
-  AdministratorID: number
+  administrator: IAdministrator
 }

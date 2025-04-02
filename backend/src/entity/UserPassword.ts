@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -18,12 +19,14 @@ export class UserPassword {
   @Column()
   encryptedPassword: string
 
-  @Column({ type: 'int' })
-  passwordExpiryTime: number
+  @Column({ type: 'int', nullable: true })
+  passwordExpiryTime: number | null
 
-  @Column({ type: 'timestamp' })
-  userAccountExpiryDate: Date
+  @Column({ type: 'timestamp', nullable: true })
+  userAccountExpiryDate: Date | null
 
-  @OneToOne('iFINANCEUser', (user: iFINANCEUser) => user.password)
+  @OneToOne('iFINANCEUser', (user: iFINANCEUser) => user.password, {
+    onDelete: 'CASCADE',
+  })
   user: IUser
 }
