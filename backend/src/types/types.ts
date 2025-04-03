@@ -5,6 +5,7 @@ declare module 'express-session' {
     profile?: {
       ID: number
       username: string
+      role: 'ADMIN' | 'USER'
     }
   }
 }

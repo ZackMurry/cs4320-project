@@ -20,5 +20,6 @@ export class NonAdminUser extends iFINANCEUser {
   email: string | null
 
   @ManyToOne('Administrator')
+  @JoinColumn()
   administrator: IAdministrator
 }

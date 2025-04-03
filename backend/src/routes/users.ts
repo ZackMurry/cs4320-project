@@ -70,7 +70,7 @@ router.post('/', async (req, res) => {
   res.sendStatus(200)
 })
 
-router.get('/', async (req, res) => {
+router.get('/', withAuth, async (req, res) => {
   console.log(req.session.profile)
   if (req.session.profile?.username !== 'admin') {
     // todo: allow changing admin name and multiple admins
@@ -82,7 +82,10 @@ router.get('/', async (req, res) => {
     res.sendStatus(403)
     return
   }
-  const users = nonAdminRepostitory.findBy({ administrator: { ID: adminID } })
+  console.log('adminID', adminID)
+  const users = await nonAdminRepostitory.find({
+    where: { administrator: { ID: adminID } },
+  })
   res.json(users)
 })
 
@@ -146,6 +149,7 @@ router.post('/login', async (req, res) => {
     req.session.profile = {
       ID: adminEntity.ID,
       username: adminEntity.password.userName,
+      role: adminEntity.type,
     }
     res.redirect('/admin')
     return
@@ -186,6 +190,26 @@ router.get('/me', withAuth, async (req, res) => {
     return
   }
   res.json({ username })
+})
+
+router.delete('/id/:id', withAuth, async (req, res) => {
+  const id = Number.parseInt(req.params.id)
+  if (req.session.profile?.role !== 'ADMIN') {
+    res.sendStatus(403) // Only the admin user is authorized
+    return
+  }
+  const adminId = req.session.profile.ID
+  const u = await nonAdminRepostitory.findOne({
+    where: { ID: id },
+    relations: ['administrator'],
+  })
+  if (!u || u.administrator.ID !== adminId) {
+    res.sendStatus(403)
+    return
+  }
+  await nonAdminRepostitory.delete(id)
+
+  res.sendStatus(200)
 })
 
 export default router
