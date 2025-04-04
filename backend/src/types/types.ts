@@ -9,3 +9,11 @@ declare module 'express-session' {
     }
   }
 }
+
+export interface NonAdminProfile {
+  userName: string
+  password?: string
+  name: string
+  email?: string
+  address?: string
+}

@@ -6,6 +6,7 @@ import * as bcrypt from 'bcrypt'
 import { EUserType, iFINANCEUser } from '../entity/iFINANCEUser.js'
 import withAuth from '../middleware/withAuth.js'
 import { Administrator } from '../entity/Administrator.js'
+import { NonAdminProfile } from '../types/types.js'
 
 const router = express.Router()
 
@@ -208,6 +209,68 @@ router.delete('/id/:id', withAuth, async (req, res) => {
     return
   }
   await nonAdminRepostitory.delete(id)
+
+  res.sendStatus(200)
+})
+
+router.get('/id/:id', withAuth, async (req, res) => {
+  const id = Number.parseInt(req.params.id)
+  if (req.session.profile?.role !== 'ADMIN') {
+    res.sendStatus(403) // Only the admin user is authorized
+    return
+  }
+  const adminId = req.session.profile.ID
+  const u = await nonAdminRepostitory.findOne({
+    where: { ID: id },
+    relations: ['administrator', 'password'],
+  })
+  if (!u || u.administrator.ID !== adminId) {
+    res.sendStatus(403)
+    return
+  }
+
+  // Return all but encrypted password
+  res.json({ ...u, password: { ...u.password, encryptedPassword: undefined } })
+})
+
+router.put('/id/:id', withAuth, async (req, res) => {
+  const id = Number.parseInt(req.params.id)
+  if (req.session.profile?.role !== 'ADMIN') {
+    res.sendStatus(403) // Only the admin user is authorized
+    return
+  }
+  const adminId = req.session.profile.ID
+  const u = await nonAdminRepostitory.findOne({
+    where: { ID: id },
+    relations: ['administrator', 'password'],
+  })
+  if (!u || u.administrator.ID !== adminId) {
+    res.sendStatus(403)
+    return
+  }
+  if (!u.password) {
+    res.sendStatus(500)
+    return
+  }
+  const { userName, password, email, address, name } =
+    req.body as NonAdminProfile
+  if (!userName || !name) {
+    res.sendStatus(400)
+    return
+  }
+
+  if (password) {
+    if (password.length < 5 || password.length > 24) {
+      res.sendStatus(400)
+      return
+    }
+    u.password.encryptedPassword = await bcrypt.hash(password, bcryptSaltRounds)
+  }
+  u.name = name
+  u.password.userName = userName
+  u.email = email || null
+  u.address = address || null
+  await nonAdminRepostitory.save(u)
 
   res.sendStatus(200)
 })
