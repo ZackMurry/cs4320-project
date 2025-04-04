@@ -31,7 +31,7 @@ const FormEntry: FC<{
   </Form.Field>
 )
 
-const AdminDashboard = () => {
+const AdminDashboard: FC = () => {
   const [formData, setFormData] = useState({
     username: '',
     password: '',
