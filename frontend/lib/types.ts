@@ -1,5 +1,6 @@
 export interface NonAdminUser {
   ID: number
+  userName: string
   name: string
   type: 'USER' | 'ADMIN'
   address: string
@@ -24,4 +25,11 @@ export interface Password {
 export interface NonAdminEntity extends NonAdminUser {
   administrator: Administrator
   password: Password
+}
+
+export interface AdminProfile {
+  ID: number
+  userName: string
+  name: string
+  role: 'ADMIN'
 }

@@ -17,3 +17,9 @@ export interface NonAdminProfile {
   email?: string
   address?: string
 }
+
+export interface AdminUpdateRequest {
+  userName: string
+  name: string
+  password?: string
+}

@@ -66,6 +66,7 @@ const AdminDashboard = () => {
         <Table.Header>
           <Table.Row>
             <Table.ColumnHeaderCell>Name</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>Username</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Email</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Address</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell className='w-[100px] '>
@@ -103,6 +104,7 @@ const AdminDashboard = () => {
               users.map((u) => (
                 <Table.Row key={u.ID}>
                   <Table.RowHeaderCell>{u.name}</Table.RowHeaderCell>
+                  <Table.Cell>{u.userName}</Table.Cell>
                   <Table.Cell>{u.email}</Table.Cell>
                   <Table.Cell>{u.address}</Table.Cell>
                   <Table.Cell>

@@ -33,13 +33,10 @@ const AdminHeader: React.FC = () => {
             </DropdownMenu.Trigger>
             <DropdownMenu.Content>
               <DropdownMenu.Item className='!cursor-pointer'>
-                Change Username
-              </DropdownMenu.Item>
-              <DropdownMenu.Item className='!cursor-pointer'>
-                Change Password
+                <a href='/admin/edit'>Edit Admin</a>
               </DropdownMenu.Item>
               <DropdownMenu.Item className='!cursor-pointer' color='red'>
-                Log Out
+                <a href='/api/v1/users/logout'>Log Out</a>
               </DropdownMenu.Item>
             </DropdownMenu.Content>
           </DropdownMenu.Root>

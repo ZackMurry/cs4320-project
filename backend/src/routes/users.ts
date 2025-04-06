@@ -6,13 +6,13 @@ import * as bcrypt from 'bcrypt'
 import { EUserType, iFINANCEUser } from '../entity/iFINANCEUser.js'
 import withAuth from '../middleware/withAuth.js'
 import { Administrator } from '../entity/Administrator.js'
-import { NonAdminProfile } from '../types/types.js'
+import { AdminUpdateRequest, NonAdminProfile } from '../types/types.js'
 
 const router = express.Router()
 
 const userRepository = db.getRepository(iFINANCEUser)
 const passwordRepository = db.getRepository(UserPassword)
-const nonAdminRepostitory = db.getRepository(NonAdminUser)
+const nonAdminRepository = db.getRepository(NonAdminUser)
 const adminRepository = db.getRepository(Administrator)
 
 const bcryptSaltRounds = 10
@@ -73,8 +73,7 @@ router.post('/', async (req, res) => {
 
 router.get('/', withAuth, async (req, res) => {
   console.log(req.session.profile)
-  if (req.session.profile?.username !== 'admin') {
-    // todo: allow changing admin name and multiple admins
+  if (req.session.profile?.role !== EUserType.ADMIN) {
     res.sendStatus(403) // Only the admin user is authorized
     return
   }
@@ -84,10 +83,22 @@ router.get('/', withAuth, async (req, res) => {
     return
   }
   console.log('adminID', adminID)
-  const users = await nonAdminRepostitory.find({
-    where: { administrator: { ID: adminID } },
-  })
-  res.json(users)
+  const users = await nonAdminRepository
+    .createQueryBuilder('user')
+    .leftJoin('user.password', 'password')
+    .addSelect(['password.userName']) // select only the userName from the password relation
+    .where('user.administrator = :adminID', { adminID })
+    .getMany()
+  if (!users) {
+    res.json([])
+    return
+  }
+  const flatUsers = users.map((user) => ({
+    ...user,
+    userName: user.password?.userName,
+    password: undefined,
+  }))
+  res.json(flatUsers)
 })
 
 router.post('/login', async (req, res) => {
@@ -166,12 +177,14 @@ router.post('/login', async (req, res) => {
       password: { ID: passEntity.ID },
     })
   )?.ID
+  let role = EUserType.ADMIN
   if (!userID) {
     userID = (
       await userRepository.findOneBy({
         password: { ID: passEntity.ID },
       })
     )?.ID
+    role = EUserType.USER
   }
   if (!userID) {
     res.sendStatus(400)
@@ -179,18 +192,62 @@ router.post('/login', async (req, res) => {
   }
 
   console.log(userID)
-  res.sendStatus(400)
+  const matches = await bcrypt.compare(password, passEntity.encryptedPassword)
+  console.log('matches', matches)
+  if (!matches) {
+    res.sendStatus(400)
+    return
+  }
+  req.session.profile = {
+    ID: userID,
+    username: passEntity.userName,
+    role: role,
+  }
+  if (role === EUserType.ADMIN) {
+    res.redirect('/admin')
+  } else {
+    res.redirect('/home')
+  }
+})
+
+router.get('/logout', withAuth, async (req, res) => {
+  req.session.destroy((err) => {})
+  res.redirect('/')
 })
 
 router.get('/me', withAuth, async (req, res) => {
   console.log('GET /api/v1/users/me')
   console.log(req.session.profile)
-  const username = req.session.profile?.username
-  if (!username) {
-    res.status(500).send()
+  if (!req.session.profile) {
+    res.sendStatus(401)
     return
   }
-  res.json({ username })
+  const { role, ID, username } = req.session.profile
+  if (role === 'ADMIN') {
+    const admin = await adminRepository.findOneBy({ ID })
+    if (!admin) {
+      res.sendStatus(500)
+      return
+    }
+    res.json({
+      role,
+      ID,
+      userName: username,
+      name: admin.name,
+    })
+  } else {
+    const user = await nonAdminRepository.findOneBy({ ID })
+    if (!user) {
+      res.sendStatus(500)
+      return
+    }
+    res.json({
+      role,
+      ID,
+      userName: username,
+      name: user.name,
+    })
+  }
 })
 
 router.delete('/id/:id', withAuth, async (req, res) => {
@@ -200,7 +257,7 @@ router.delete('/id/:id', withAuth, async (req, res) => {
     return
   }
   const adminId = req.session.profile.ID
-  const u = await nonAdminRepostitory.findOne({
+  const u = await nonAdminRepository.findOne({
     where: { ID: id },
     relations: ['administrator'],
   })
@@ -208,7 +265,7 @@ router.delete('/id/:id', withAuth, async (req, res) => {
     res.sendStatus(403)
     return
   }
-  await nonAdminRepostitory.delete(id)
+  await nonAdminRepository.delete(id)
 
   res.sendStatus(200)
 })
@@ -220,7 +277,7 @@ router.get('/id/:id', withAuth, async (req, res) => {
     return
   }
   const adminId = req.session.profile.ID
-  const u = await nonAdminRepostitory.findOne({
+  const u = await nonAdminRepository.findOne({
     where: { ID: id },
     relations: ['administrator', 'password'],
   })
@@ -233,6 +290,57 @@ router.get('/id/:id', withAuth, async (req, res) => {
   res.json({ ...u, password: { ...u.password, encryptedPassword: undefined } })
 })
 
+router.put('/me', withAuth, async (req, res) => {
+  if (!req.session.profile) {
+    res.sendStatus(401)
+    return
+  }
+  const { role, ID } = req.session.profile
+  if (role === 'ADMIN') {
+    const admin = await adminRepository.findOne({
+      where: { ID },
+      relations: ['password'],
+    })
+    if (!admin || !admin.password) {
+      res.sendStatus(500)
+      return
+    }
+    const { userName, password, name } = req.body as AdminUpdateRequest
+    if (password) {
+      if (password.length < 5 || password.length > 24) {
+        res.sendStatus(400)
+        return
+      }
+      admin.password.encryptedPassword = await bcrypt.hash(
+        password,
+        bcryptSaltRounds,
+      )
+    }
+    if (userName !== admin.password.userName) {
+      // If name is changing
+      let sameName = await adminRepository.count({
+        where: { password: { userName: userName } },
+        relations: ['password'],
+      })
+      sameName += await nonAdminRepository.count({
+        where: { password: { userName: userName } },
+        relations: ['password'],
+      })
+      if (sameName > 0) {
+        res.sendStatus(409) // Conflict
+        return
+      }
+    }
+    admin.name = name
+    admin.password.userName = userName
+    await adminRepository.save(admin)
+    res.sendStatus(200)
+  } else {
+    // Users can't change their own profiles
+    res.sendStatus(400)
+  }
+})
+
 router.put('/id/:id', withAuth, async (req, res) => {
   const id = Number.parseInt(req.params.id)
   if (req.session.profile?.role !== 'ADMIN') {
@@ -240,7 +348,7 @@ router.put('/id/:id', withAuth, async (req, res) => {
     return
   }
   const adminId = req.session.profile.ID
-  const u = await nonAdminRepostitory.findOne({
+  const u = await nonAdminRepository.findOne({
     where: { ID: id },
     relations: ['administrator', 'password'],
   })
@@ -270,7 +378,7 @@ router.put('/id/:id', withAuth, async (req, res) => {
   u.password.userName = userName
   u.email = email || null
   u.address = address || null
-  await nonAdminRepostitory.save(u)
+  await nonAdminRepository.save(u)
 
   res.sendStatus(200)
 })
