@@ -36,7 +36,8 @@ const LogInPage: React.FC = () => {
           window.location.href = '/'
         }
       } else {
-        window.location.href = '/admin'
+        // window.location.href = '/admin'
+        window.location.href = response.url
       }
 
       // Handle successful login

@@ -1,0 +1,11 @@
+.MuiTreeItem-groupTransition {
+  /* border: 2px dashed gray; */
+  padding-left: 15px;
+  margin-left: 15px;
+}
+
+/* ul > li > ul > div > div > li > .MuiTreeItem-content { */
+ul[role='tree'] li li.MuiTreeItem-root {
+  border-left: 1px solid rgba(100, 100, 100, 0.5);
+  margin-left: 3px;
+}

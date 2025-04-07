@@ -33,3 +33,9 @@ export interface AdminProfile {
   name: string
   role: 'ADMIN'
 }
+
+export interface Group {
+  id: number
+  label: string
+  children: Group[]
+}

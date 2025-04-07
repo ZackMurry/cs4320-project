@@ -180,11 +180,12 @@ router.post('/login', async (req, res) => {
   let role = EUserType.ADMIN
   if (!userID) {
     userID = (
-      await userRepository.findOneBy({
+      await nonAdminRepository.findOneBy({
         password: { ID: passEntity.ID },
       })
     )?.ID
     role = EUserType.USER
+    console.log('NON ADMIN LOGIN')
   }
   if (!userID) {
     res.sendStatus(400)
