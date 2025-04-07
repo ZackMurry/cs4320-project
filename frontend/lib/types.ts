@@ -35,7 +35,39 @@ export interface AdminProfile {
 }
 
 export interface Group {
-  id: number
-  label: string
+  ID: number
+  name: string
+  parentID: number | null
+  categoryID: number
   children: Group[]
+}
+
+export type CategoryType = 'DEBIT' | 'CREDIT'
+
+export interface Category {
+  ID: number
+  name: string
+  type: CategoryType
+}
+
+export interface GroupTreeResponse {
+  categories: Category[]
+  groups: Group[]
+}
+
+export interface GroupTree extends Group {
+  id: string
+  label: string
+}
+
+export interface CategoryTree extends Category {
+  id: string
+  label: string
+  children: GroupTree[]
+}
+
+export interface CreateGroupRequest {
+  name: string
+  parent?: number
+  category?: number
 }

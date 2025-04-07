@@ -1,15 +1,7 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  OneToOne,
-  PrimaryColumn,
-  PrimaryGeneratedColumn,
-} from 'typeorm'
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm'
 import { iFINANCEUser } from './iFINANCEUser.js'
-import { Administrator, IAdministrator } from './Administrator.js'
+import { IAdministrator } from './Administrator.js'
+import { AccountGroup } from './AccountGroup.js'
 
 @Entity()
 export class NonAdminUser extends iFINANCEUser {
@@ -22,4 +14,7 @@ export class NonAdminUser extends iFINANCEUser {
   @ManyToOne('Administrator')
   @JoinColumn()
   administrator: IAdministrator
+
+  @OneToMany('AccountGroup', (g: AccountGroup) => g.user)
+  groups: AccountGroup[]
 }

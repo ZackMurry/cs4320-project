@@ -7,10 +7,16 @@ import session from 'express-session'
 import './types/types.js'
 
 import userRoutes from './routes/users.js'
+import groupRoutes from './routes/groups.js'
 import { NonAdminUser } from './entity/NonAdminUser.js'
+import { AccountingCategory } from './entity/AccountingCategory.js'
+import seedCategories from './util/seedCategories.js'
 
 db.initialize()
-  .then(() => console.log('Data source initialized!'))
+  .then(async () => {
+    await seedCategories()
+    console.log('Data source initialized!')
+  })
   .catch((err) => {
     console.error('Error during Data Source initialization:', err)
   })
@@ -34,11 +40,9 @@ app.use(
     },
   }),
 )
-console.log('1')
 
 app.use('/api/v1/users', userRoutes)
-
-const userRepository = db.getRepository(NonAdminUser)
+app.use('/api/v1/groups', groupRoutes)
 
 app.get('/api/v1/logout', async (req, res) => {
   req.session.destroy((err) => {

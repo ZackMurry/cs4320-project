@@ -4,10 +4,16 @@ import DashboardPage from '@/components/DashboardPage'
 import { RichTreeView, TreeItem } from '@mui/x-tree-view'
 import { Card, ContextMenu, Heading } from '@radix-ui/themes'
 import { Square, SquareMinus, SquarePlus } from 'lucide-react'
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import './styles.css'
 import AddGroupDialog from '@/components/AddGroupDialog'
-import { Group } from '@/lib/types'
+import {
+  Category,
+  CategoryTree,
+  Group,
+  GroupTree,
+  GroupTreeResponse,
+} from '@/lib/types'
 import RenameGroupDialog from '@/components/RenameGroupDialog'
 import DeleteGroupDialog from '@/components/DeleteGroupDialog'
 
@@ -91,25 +97,15 @@ const groups = [
   },
 ] as Group[]
 
-const getGroupById = (id: number, groups: Group[]): Group | null => {
-  for (const group of groups) {
-    if (group.id === id) {
-      return group // Return label if id matches
-    }
-
-    if (group.children) {
-      const result = getGroupById(id, group.children) // Recursively check children
-      if (result) return result // Return the label from children if found
-    }
-  }
-  return null // Return null if id not found
-}
-
 let clickTime = 0
 
+// todo: implement renaming and update UI after changes without reloading
 const ManageAccountGroups = () => {
+  const [tree, setTree] = useState<CategoryTree[]>([])
+  const [groups, setGroups] = useState<Group[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [error, setError] = useState<string>('')
-  const [selectedItemId, setSelectedItemId] = useState<number | null>(null)
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
   const [openDialog, setOpenDialog] = useState<
     'add' | 'rename' | 'delete' | null
   >(null)
@@ -124,19 +120,85 @@ const ManageAccountGroups = () => {
       return
     }
     console.log(e.currentTarget.dataset.id)
-    setSelectedItemId(Number.parseInt(itemId)) // Set the selected item id
+    setSelectedItemId(itemId) // Set the selected item id
     clickTime = new Date().getTime()
   }
 
-  const handleMenuAction = (action: string) => {
-    console.log(`${action} for item ${selectedItemId}`)
-    setSelectedItemId(null) // Reset selected item id after action
-  }
+  useEffect(() => {
+    const fetchGroups = async () => {
+      const res = await fetch('/api/v1/groups')
+      if (res.ok) {
+        const { groups, categories } = (await res.json()) as GroupTreeResponse
+        setGroups(groups)
+        setCategories(categories)
+        const nodes: CategoryTree[] = []
+        for (const category of categories) {
+          nodes.push({
+            ...category,
+            id: `category-${category.ID}`,
+            label: category.name,
+            children: [],
+          })
+        }
+        const matched: { [id: number]: GroupTree } = {}
+        for (const group of groups) {
+          if (group.parentID === null) {
+            const catNode = nodes.findLast((n) => n.ID === group.categoryID)
+            if (!catNode) {
+              console.error('Could not build group tree!')
+              continue
+            }
+            console.log('adding to category', catNode.ID)
+            const newNode = {
+              ...group,
+              id: `group-${group.ID}`,
+              label: group.name,
+              children: [],
+            }
+            catNode.children.push(newNode)
+            matched[group.ID] = newNode
+          }
+        }
+        // Add groups with parents
+        while (Object.keys(matched).length !== groups.length) {
+          for (const group of groups) {
+            if (matched[group.ID]) {
+              continue
+            }
+            if (!group.parentID) {
+              console.error('Could not build group tree!')
+              return
+            }
+            const parentNode = matched[group.parentID]
+            if (!parentNode) {
+              continue
+            }
+            const newNode = {
+              ...group,
+              id: `group-${group.ID}`,
+              label: group.name,
+              children: [],
+            }
+            parentNode.children.push(newNode)
+            matched[group.ID] = newNode
+          }
+        }
+        setTree(nodes)
+      }
+    }
+    fetchGroups()
+  }, [])
 
-  const currentGroup = useMemo(
-    () => getGroupById(selectedItemId!, groups),
-    [selectedItemId],
-  )
+  const currentNode = useMemo(() => {
+    if (!selectedItemId) {
+      return null
+    }
+    if (selectedItemId.startsWith('group-')) {
+      return groups.findLast((g) => `group-${g.ID}` === selectedItemId)
+    }
+    return categories.findLast((c) => `category-${c.ID}` === selectedItemId)
+  }, [selectedItemId, groups, categories])
+  console.log(tree)
 
   return (
     <DashboardPage>
@@ -165,7 +227,7 @@ const ManageAccountGroups = () => {
                   />
                 ),
               }}
-              items={groups}
+              items={tree}
             />
           </ContextMenu.Trigger>
         </Card>
@@ -192,22 +254,25 @@ const ManageAccountGroups = () => {
           </ContextMenu.Item>
         </ContextMenu.Content>
       </ContextMenu.Root>
-      {currentGroup && (
+      {currentNode && (
         <>
           <AddGroupDialog
             isOpen={openDialog === 'add'}
             onClose={() => setOpenDialog(null)}
-            group={currentGroup}
+            node={currentNode}
+            onError={setError}
           />
           <RenameGroupDialog
             isOpen={openDialog === 'rename'}
             onClose={() => setOpenDialog(null)}
-            group={currentGroup}
+            node={currentNode}
+            onError={setError}
           />
           <DeleteGroupDialog
             isOpen={openDialog === 'delete'}
             onClose={() => setOpenDialog(null)}
-            group={currentGroup}
+            node={currentNode}
+            onError={setError}
           />
         </>
       )}

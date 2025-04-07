@@ -1,19 +1,20 @@
-import { Group } from '@/lib/types'
+import { Category, Group } from '@/lib/types'
 import { Button, Dialog, Flex, Text, TextField } from '@radix-ui/themes'
 import { FC } from 'react'
 
 interface Props {
   isOpen: boolean
   onClose: () => void
-  group: Group
+  node: Group | Category
+  onError: (er: string) => void
 }
 
-const RenameGroupDialog: FC<Props> = ({ isOpen, onClose, group }) => (
+const RenameGroupDialog: FC<Props> = ({ isOpen, onClose, node, onError }) => (
   <Dialog.Root open={isOpen} onOpenChange={onClose}>
     <Dialog.Content maxWidth='450px' className='z-[100]'>
       <Dialog.Title>Rename Group</Dialog.Title>
       <Dialog.Description size='2' mb='4'>
-        Change the name of &quot;{group.label}&quot;.
+        Change the name of &quot;{node.name}&quot;.
       </Dialog.Description>
 
       <Flex direction='column' gap='3'>
@@ -22,7 +23,7 @@ const RenameGroupDialog: FC<Props> = ({ isOpen, onClose, group }) => (
             Name
           </Text>
           <TextField.Root
-            defaultValue={group.label}
+            defaultValue={node.name}
             placeholder='The new group name'
           />
         </label>

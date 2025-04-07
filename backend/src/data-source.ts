@@ -3,6 +3,8 @@ import { iFINANCEUser } from './entity/iFINANCEUser.js'
 import { Administrator } from './entity/Administrator.js'
 import { NonAdminUser } from './entity/NonAdminUser.js'
 import { UserPassword } from './entity/UserPassword.js'
+import { AccountingCategory } from './entity/AccountingCategory.js'
+import { AccountGroup } from './entity/AccountGroup.js'
 
 console.log('Initializing data source...')
 
@@ -17,7 +19,14 @@ export const db = new DataSource({
   database: 'group14_ifinancedb',
   synchronize: true,
   logging: true,
-  entities: [iFINANCEUser, Administrator, NonAdminUser, UserPassword],
+  entities: [
+    iFINANCEUser,
+    Administrator,
+    NonAdminUser,
+    UserPassword,
+    AccountingCategory,
+    AccountGroup,
+  ],
   subscribers: [],
   migrations: [],
 })
