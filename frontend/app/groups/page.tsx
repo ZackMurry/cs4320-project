@@ -120,8 +120,111 @@ const ManageAccountGroups = () => {
       return
     }
     console.log(e.currentTarget.dataset.id)
-    setSelectedItemId(itemId) // Set the selected item id
+    setSelectedItemId(itemId)
     clickTime = new Date().getTime()
+  }
+
+  const buildTree = (groups: Group[], categories: Category[]) => {
+    const nodes: CategoryTree[] = []
+    for (const category of categories) {
+      nodes.push({
+        ...category,
+        id: `category-${category.ID}`,
+        label: category.name,
+        children: [],
+      })
+    }
+    const matched: { [id: number]: GroupTree } = {}
+    for (const group of groups) {
+      if (group.parentID === null) {
+        const catNode = nodes.findLast((n) => n.ID === group.categoryID)
+        if (!catNode) {
+          console.error('Could not build group tree!')
+          continue
+        }
+        console.log('adding to category', catNode.ID)
+        const newNode = {
+          ...group,
+          id: `group-${group.ID}`,
+          label: group.name,
+          children: [],
+        }
+        catNode.children.push(newNode)
+        matched[group.ID] = newNode
+      }
+    }
+    // Add groups with parents
+    while (Object.keys(matched).length !== groups.length) {
+      for (const group of groups) {
+        if (matched[group.ID]) {
+          continue
+        }
+        if (!group.parentID) {
+          console.error('Could not build group tree!')
+          return
+        }
+        const parentNode = matched[group.parentID]
+        if (!parentNode) {
+          continue
+        }
+        const newNode = {
+          ...group,
+          id: `group-${group.ID}`,
+          label: group.name,
+          children: [],
+        }
+        parentNode.children.push(newNode)
+        matched[group.ID] = newNode
+      }
+    }
+    setTree(nodes)
+  }
+
+  const handleRename = (val: string) => {
+    const newGroups = groups.map((g) => {
+      if (`group-${g.ID}` === selectedItemId) {
+        return {
+          ...g,
+          name: val,
+        }
+      } else return g
+    })
+    buildTree(newGroups, categories)
+  }
+
+  const getDescendants = (id: number) => {
+    const grs = groups.filter((g) => g.parentID === id).map((g) => g.ID)
+    console.log('gr', grs)
+    if (!grs) {
+      window.location.reload() // Just reload instead of updating
+      return []
+    }
+    for (const c of grs) {
+      grs.push(...getDescendants(c))
+    }
+    return grs
+  }
+
+  const handleDelete = () => {
+    console.log('delete')
+    if (!selectedItemId) {
+      window.location.reload()
+      return
+    }
+    const id = Number.parseInt(selectedItemId.substring('group-'.length))
+    const children = getDescendants(id)
+    console.log('children', children)
+    const newGroups = groups.filter(
+      (g) => !children.includes(g.ID) && id !== g.ID,
+    )
+    setGroups(newGroups)
+    buildTree(newGroups, categories)
+  }
+
+  const handleAdd = (g: Group) => {
+    const newGroups = [...groups, g]
+    buildTree(newGroups, categories)
+    setGroups(newGroups)
   }
 
   useEffect(() => {
@@ -131,59 +234,7 @@ const ManageAccountGroups = () => {
         const { groups, categories } = (await res.json()) as GroupTreeResponse
         setGroups(groups)
         setCategories(categories)
-        const nodes: CategoryTree[] = []
-        for (const category of categories) {
-          nodes.push({
-            ...category,
-            id: `category-${category.ID}`,
-            label: category.name,
-            children: [],
-          })
-        }
-        const matched: { [id: number]: GroupTree } = {}
-        for (const group of groups) {
-          if (group.parentID === null) {
-            const catNode = nodes.findLast((n) => n.ID === group.categoryID)
-            if (!catNode) {
-              console.error('Could not build group tree!')
-              continue
-            }
-            console.log('adding to category', catNode.ID)
-            const newNode = {
-              ...group,
-              id: `group-${group.ID}`,
-              label: group.name,
-              children: [],
-            }
-            catNode.children.push(newNode)
-            matched[group.ID] = newNode
-          }
-        }
-        // Add groups with parents
-        while (Object.keys(matched).length !== groups.length) {
-          for (const group of groups) {
-            if (matched[group.ID]) {
-              continue
-            }
-            if (!group.parentID) {
-              console.error('Could not build group tree!')
-              return
-            }
-            const parentNode = matched[group.parentID]
-            if (!parentNode) {
-              continue
-            }
-            const newNode = {
-              ...group,
-              id: `group-${group.ID}`,
-              label: group.name,
-              children: [],
-            }
-            parentNode.children.push(newNode)
-            matched[group.ID] = newNode
-          }
-        }
-        setTree(nodes)
+        buildTree(groups, categories)
       }
     }
     fetchGroups()
@@ -261,18 +312,21 @@ const ManageAccountGroups = () => {
             onClose={() => setOpenDialog(null)}
             node={currentNode}
             onError={setError}
+            onAdd={handleAdd}
           />
           <RenameGroupDialog
             isOpen={openDialog === 'rename'}
             onClose={() => setOpenDialog(null)}
             node={currentNode}
             onError={setError}
+            onRename={handleRename}
           />
           <DeleteGroupDialog
             isOpen={openDialog === 'delete'}
             onClose={() => setOpenDialog(null)}
             node={currentNode}
             onError={setError}
+            onDelete={handleDelete}
           />
         </>
       )}

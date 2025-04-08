@@ -7,9 +7,16 @@ interface Props {
   onClose: () => void
   node: Group | Category
   onError: (er: string) => void
+  onAdd: (group: Group) => void
 }
 
-const AddGroupDialog: FC<Props> = ({ isOpen, onClose, node, onError }) => {
+const AddGroupDialog: FC<Props> = ({
+  isOpen,
+  onClose,
+  node,
+  onError,
+  onAdd,
+}) => {
   const [name, setName] = useState('')
 
   const addGroup = async () => {
@@ -31,7 +38,9 @@ const AddGroupDialog: FC<Props> = ({ isOpen, onClose, node, onError }) => {
       body: JSON.stringify(body),
     })
     if (res.ok) {
-      window.location.reload()
+      const { name, parentID, categoryID, ID } = await res.json()
+      onAdd({ name, parentID, categoryID, ID, children: [] })
+      setName('')
     } else {
       onError('Error creating group')
     }
@@ -53,7 +62,7 @@ const AddGroupDialog: FC<Props> = ({ isOpen, onClose, node, onError }) => {
             <TextField.Root
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder='Enter the name of the new group'
+              placeholder='New group name'
             />
           </label>
         </Flex>

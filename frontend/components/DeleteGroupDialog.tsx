@@ -7,10 +7,17 @@ interface Props {
   onClose: () => void
   node: Group | Category
   onError: (er: string) => void
+  onDelete: () => void
 }
 
-const DeleteGroupDialog: FC<Props> = ({ isOpen, onClose, node, onError }) => {
-  const onDelete = async () => {
+const DeleteGroupDialog: FC<Props> = ({
+  isOpen,
+  onClose,
+  node,
+  onError,
+  onDelete,
+}) => {
+  const deleteGroup = async () => {
     if (!node.hasOwnProperty('categoryID')) {
       // This node is a category!
       onError('Root accounting categories cannot be deleted')
@@ -20,7 +27,7 @@ const DeleteGroupDialog: FC<Props> = ({ isOpen, onClose, node, onError }) => {
       method: 'DELETE',
     })
     if (res.ok) {
-      window.location.reload()
+      onDelete()
     } else {
       onError('Failed to delete group.')
     }
@@ -41,7 +48,7 @@ const DeleteGroupDialog: FC<Props> = ({ isOpen, onClose, node, onError }) => {
             </Button>
           </Dialog.Close>
           <Dialog.Close>
-            <Button color='red' onClick={onDelete}>
+            <Button color='red' onClick={deleteGroup}>
               Delete
             </Button>
           </Dialog.Close>

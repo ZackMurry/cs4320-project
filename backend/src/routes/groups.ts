@@ -85,6 +85,8 @@ router.post('/', withUserAuth, async (req, res) => {
   ag.name = name
   ag.parent = parentGroup
   await groupRepository.save(ag)
+
+  res.json(ag)
 })
 
 router.delete('/id/:id', withUserAuth, async (req, res) => {
@@ -107,6 +109,37 @@ router.delete('/id/:id', withUserAuth, async (req, res) => {
     return
   }
   await groupRepository.delete(id)
+  res.sendStatus(200)
+})
+
+router.put('/id/:id', withUserAuth, async (req, res) => {
+  if (!req.session.profile) {
+    res.sendStatus(401)
+    return
+  }
+  const userId = req.session.profile.ID
+  const id = Number.parseInt(req.params.id)
+  if (!id) {
+    res.sendStatus(400)
+    return
+  }
+  const group = await groupRepository.findOneBy({
+    ID: id,
+    user: { ID: userId },
+  })
+  if (!group) {
+    res.sendStatus(404)
+    return
+  }
+
+  const name = req.body.name
+  if (!name || name.length > 256) {
+    res.sendStatus(400)
+    return
+  }
+  group.name = name
+  await groupRepository.save(group)
+  res.sendStatus(200)
 })
 
 export default router
