@@ -1,11 +1,4 @@
-import {
-  Category,
-  CreateGroupRequest,
-  Group,
-  MasterAccount,
-  MasterAccountResponse,
-  NamedGroup,
-} from '@/lib/types'
+import { MasterAccountResponse, NamedGroup } from '@/lib/types'
 import { Button, Dialog, Flex, Select, Text, TextField } from '@radix-ui/themes'
 import { FC, useState } from 'react'
 

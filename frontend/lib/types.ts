@@ -90,3 +90,10 @@ export interface MasterAccountResponse {
   closingAmount: number
   groupID: number
 }
+
+export interface Transaction {
+  ID: number
+  description: string
+  date: string
+  userID: number
+}

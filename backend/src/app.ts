@@ -9,6 +9,7 @@ import './types/types.js'
 import userRoutes from './routes/users.js'
 import groupRoutes from './routes/groups.js'
 import accountRoutes from './routes/accounts.js'
+import txnRoutes from './routes/transactions.js'
 import { NonAdminUser } from './entity/NonAdminUser.js'
 import { AccountingCategory } from './entity/AccountingCategory.js'
 import seedCategories from './util/seedCategories.js'
@@ -45,6 +46,7 @@ app.use(
 app.use('/api/v1/users', userRoutes)
 app.use('/api/v1/groups', groupRoutes)
 app.use('/api/v1/accounts', accountRoutes)
+app.use('/api/v1/transactions', txnRoutes)
 
 app.get('/api/v1/logout', async (req, res) => {
   req.session.destroy((err) => {

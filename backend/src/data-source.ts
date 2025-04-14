@@ -6,6 +6,7 @@ import { UserPassword } from './entity/UserPassword.js'
 import { AccountingCategory } from './entity/AccountingCategory.js'
 import { AccountGroup } from './entity/AccountGroup.js'
 import { MasterAccount } from './entity/MasterAccount.js'
+import { Transaction } from './entity/Transaction.js'
 
 console.log('Initializing data source...')
 
@@ -28,6 +29,7 @@ export const db = new DataSource({
     AccountingCategory,
     AccountGroup,
     MasterAccount,
+    Transaction,
   ],
   subscribers: [],
   migrations: [],
