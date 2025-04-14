@@ -71,3 +71,22 @@ export interface CreateGroupRequest {
   parent?: number
   category?: number
 }
+
+export interface MasterAccount {
+  name: string
+  openingAmount: number
+  groupID: number
+}
+
+export interface NamedGroup {
+  id: number
+  fullName: string
+}
+
+export interface MasterAccountResponse {
+  ID: number
+  name: string
+  openingAmount: number
+  closingAmount: number
+  groupID: number
+}

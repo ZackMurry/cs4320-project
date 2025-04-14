@@ -54,7 +54,10 @@ router.post('/', withUserAuth, async (req, res) => {
   let parentGroup = null
   if (parent) {
     console.log('Using parent for group', parent)
-    parentGroup = await groupRepository.findOneBy({ ID: parent })
+    parentGroup = await groupRepository.findOne({
+      where: { ID: parent },
+      relations: ['category'],
+    })
     if (!parentGroup) {
       res.sendStatus(400)
       return

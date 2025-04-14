@@ -8,6 +8,7 @@ import {
 } from 'typeorm'
 import { NonAdminUser } from './NonAdminUser.js'
 import { AccountingCategory } from './AccountingCategory.js'
+import { MasterAccount } from './MasterAccount.js'
 
 @Entity()
 export class AccountGroup {
@@ -40,4 +41,7 @@ export class AccountGroup {
   @ManyToOne('AccountingCategory', (ac: AccountingCategory) => ac.groups)
   @JoinColumn({ name: 'categoryID' })
   category: AccountingCategory
+
+  @OneToMany('MasterAccount', (ma: MasterAccount) => ma.groupID)
+  accounts: AccountGroup[]
 }

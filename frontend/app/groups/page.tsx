@@ -99,7 +99,6 @@ const groups = [
 
 let clickTime = 0
 
-// todo: implement renaming and update UI after changes without reloading
 const ManageAccountGroups = () => {
   const [tree, setTree] = useState<CategoryTree[]>([])
   const [groups, setGroups] = useState<Group[]>([])
