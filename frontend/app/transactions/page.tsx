@@ -1,16 +1,7 @@
 'use client'
-import AddAccountDialog from '@/components/AddAccountDialog'
 import AddTransactionDialog from '@/components/AddTransactionDialog'
 import DashboardPage from '@/components/DashboardPage'
-import EditAccountDialog from '@/components/EditAccountDialog'
-import {
-  Category,
-  Group,
-  GroupTreeResponse,
-  MasterAccountResponse,
-  NamedGroup,
-  Transaction,
-} from '@/lib/types'
+import { Transaction } from '@/lib/types'
 import {
   AlertDialog,
   Button,
@@ -19,54 +10,14 @@ import {
   IconButton,
   Table,
 } from '@radix-ui/themes'
-import { Edit, Trash2 } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { MouseEvent, useEffect, useState } from 'react'
 import { format } from 'date-fns'
 
-const buildGroupArray = (
-  groups: Group[],
-  categories: Category[],
-): NamedGroup[] => {
-  const categoryMap = new Map<number, string>()
-  categories.forEach((cat) => {
-    categoryMap.set(cat.ID, cat.name)
-  })
-
-  const groupMap = new Map<number, Group>()
-  groups.forEach((group) => {
-    groupMap.set(group.ID, group)
-  })
-
-  const getFullName = (group: Group): string => {
-    const names: string[] = []
-    let current: Group | undefined = group
-
-    while (current) {
-      names.unshift(current.name)
-      current =
-        current.parentID !== null ? groupMap.get(current.parentID) : undefined
-    }
-
-    const rootCategory = categoryMap.get(group.categoryID)
-    if (rootCategory) {
-      names.unshift(rootCategory)
-    }
-
-    return names.join(`\\`)
-  }
-
-  return groups.map((group) => ({
-    id: group.ID,
-    fullName: getFullName(group),
-  }))
-}
-
 const ManageTransactions = () => {
   const [error, setError] = useState('')
   const [dialog, setDialog] = useState<'add' | null>(null)
-  const [groups, setGroups] = useState<NamedGroup[]>([])
-  const [accounts, setAccounts] = useState<MasterAccountResponse[]>()
   const [transactions, setTransactions] = useState<Transaction[]>()
   const [selectedTxn, setSelectedTxn] = useState<Transaction | null>(null)
   const router = useRouter()
@@ -80,29 +31,6 @@ const ManageTransactions = () => {
       }
     }
     fetchTransactions()
-
-    const fetchGroups = async () => {
-      const res = await fetch('/api/v1/groups')
-      if (res.ok) {
-        const { groups, categories } = (await res.json()) as GroupTreeResponse
-        const groupList = buildGroupArray(groups, categories).sort((a, b) =>
-          a.fullName.localeCompare(b.fullName),
-        )
-        setGroups(groupList)
-      } else {
-        setError('Failed to load groups')
-      }
-    }
-    fetchGroups()
-
-    const fetchAccounts = async () => {
-      const res = await fetch('/api/v1/accounts')
-      if (res.ok) {
-        const acts = (await res.json()) as MasterAccountResponse[]
-        setAccounts(acts)
-      }
-    }
-    fetchAccounts()
   }, [])
 
   const handleAdd = (t: Transaction) => {
@@ -132,8 +60,6 @@ const ManageTransactions = () => {
 
     setSelectedTxn(null)
   }
-
-  console.log(groups)
 
   return (
     <DashboardPage>

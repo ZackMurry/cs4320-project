@@ -97,3 +97,8 @@ export interface Transaction {
   date: string
   userID: number
 }
+
+export interface FullTransaction extends Transaction {
+  lines: number
+  // lines: TransactionLine
+}

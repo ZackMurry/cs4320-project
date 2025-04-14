@@ -6,9 +6,8 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm'
-import { NonAdminUser } from './NonAdminUser.js'
-import { AccountingCategory } from './AccountingCategory.js'
 import { AccountGroup } from './AccountGroup.js'
+import { TransactionLine } from './TransactionLine.js'
 
 @Entity()
 export class MasterAccount {
@@ -47,4 +46,7 @@ export class MasterAccount {
   })
   @JoinColumn({ name: 'groupID' })
   group: AccountGroup
+
+  @OneToMany('TransactionLine', (tl: TransactionLine) => tl.account)
+  transactionLines: TransactionLine[]
 }

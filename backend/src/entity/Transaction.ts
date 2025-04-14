@@ -7,8 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm'
 import { NonAdminUser } from './NonAdminUser.js'
-import { AccountingCategory } from './AccountingCategory.js'
-import { AccountGroup } from './AccountGroup.js'
+import { TransactionLine } from './TransactionLine.js'
 
 @Entity()
 export class Transaction {
@@ -27,4 +26,7 @@ export class Transaction {
 
   @Column({ type: 'text' })
   description: string
+
+  @OneToMany('TransactionLine', (tl: TransactionLine) => tl.transaction)
+  lines: TransactionLine[]
 }

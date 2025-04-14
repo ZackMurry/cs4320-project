@@ -7,10 +7,9 @@ import { AccountingCategory } from './entity/AccountingCategory.js'
 import { AccountGroup } from './entity/AccountGroup.js'
 import { MasterAccount } from './entity/MasterAccount.js'
 import { Transaction } from './entity/Transaction.js'
+import { TransactionLine } from './entity/TransactionLine.js'
 
 console.log('Initializing data source...')
-
-// todo: course opt-in, nickname
 
 export const db = new DataSource({
   type: 'postgres',
@@ -30,6 +29,7 @@ export const db = new DataSource({
     AccountGroup,
     MasterAccount,
     Transaction,
+    TransactionLine,
   ],
   subscribers: [],
   migrations: [],
