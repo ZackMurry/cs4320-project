@@ -337,8 +337,26 @@ router.put('/me', withAuth, async (req, res) => {
     await adminRepository.save(admin)
     res.sendStatus(200)
   } else {
-    // Users can't change their own profiles
-    res.sendStatus(400)
+    // Users can only change their password
+    const password = req.body.password
+    if (!password || password.length < 5 || password.length > 24) {
+      res.sendStatus(400)
+      return
+    }
+    const user = await nonAdminRepository.findOne({
+      where: { ID },
+      relations: ['password'],
+    })
+    if (!user || !user.password) {
+      res.sendStatus(401)
+      return
+    }
+    user.password.encryptedPassword = await bcrypt.hash(
+      password,
+      bcryptSaltRounds,
+    )
+    await nonAdminRepository.save(user)
+    res.sendStatus(200)
   }
 })
 

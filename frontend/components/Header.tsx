@@ -1,3 +1,5 @@
+import { DropdownMenu, IconButton } from '@radix-ui/themes'
+import { CircleUser } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
 
@@ -26,18 +28,36 @@ const Header: React.FC = () => {
           >
             Accounts
           </a>
-          <a
+          <Link
             href='/transactions'
             className='text-lg hover:text-gray-300 transition duration-200'
           >
             Transactions
-          </a>
+          </Link>
           <a
             href='/reports'
             className='text-lg hover:text-gray-300 transition duration-200'
           >
             Reports
           </a>
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger>
+              <IconButton
+                variant='outline'
+                className='text-white !cursor-pointer'
+              >
+                <CircleUser size='lg' className='text-white' />
+              </IconButton>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Content>
+              <DropdownMenu.Item className='!cursor-pointer'>
+                <a href='/password'>Change Password</a>
+              </DropdownMenu.Item>
+              <DropdownMenu.Item className='!cursor-pointer' color='red'>
+                <a href='/api/v1/users/logout'>Log Out</a>
+              </DropdownMenu.Item>
+            </DropdownMenu.Content>
+          </DropdownMenu.Root>
         </nav>
       </div>
     </header>

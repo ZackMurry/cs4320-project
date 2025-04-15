@@ -4,12 +4,10 @@ import DashboardPage from '@/components/DashboardPage'
 import { Button, Heading } from '@radix-ui/themes'
 import * as Form from '@radix-ui/react-form'
 import { FC, FormEvent, useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
 import { AdminProfile } from '@/lib/types'
 import FormEntry from '@/components/FormEntry'
 
 const EditAdminPage: FC = () => {
-  const params = useParams()
   const [user, setUser] = useState<AdminProfile | null>(null)
   const [password, setPassword] = useState({ value: '', modified: false })
   const [loading, setLoading] = useState(false)
@@ -78,7 +76,7 @@ const EditAdminPage: FC = () => {
       }
     }
     fetchUser()
-  }, [setUser, params.id])
+  }, [setUser])
 
   return (
     <DashboardPage isAdmin>
