@@ -7,25 +7,27 @@ interface Props {
   isOpen: boolean
   onClose: () => void
   onError: (er: string) => void
-  onAdd: (txn: Transaction) => void
+  onEdit: (txn: Transaction) => void
+  transaction: Transaction
 }
 
-const AddTransactionDialog: FC<Props> = ({
+const EditTransactionDialog: FC<Props> = ({
   isOpen,
   onClose,
   onError,
-  onAdd,
+  onEdit,
+  transaction,
 }) => {
-  const [description, setDescription] = useState('')
-  const [date, setDate] = useState<string>('')
+  const [description, setDescription] = useState(transaction.description)
+  const [date, setDate] = useState<string>(transaction.formattedDate)
 
   const addTransaction = async () => {
     if (!date) {
       onError('You must enter a transaction date!')
       return
     }
-    const res = await fetch('/api/v1/transactions', {
-      method: 'POST',
+    const res = await fetch(`/api/v1/transactions/id/${transaction.ID}`, {
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -36,9 +38,9 @@ const AddTransactionDialog: FC<Props> = ({
     })
     if (res.ok) {
       const newTxn = await res.json()
-      onAdd(newTxn)
+      onEdit(newTxn)
     } else {
-      onError('Error creating transaction')
+      onError(`Error updating transaction (code ${res.status})`)
     }
   }
 
@@ -96,4 +98,4 @@ const AddTransactionDialog: FC<Props> = ({
   )
 }
 
-export default AddTransactionDialog
+export default EditTransactionDialog

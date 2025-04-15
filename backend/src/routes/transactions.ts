@@ -7,6 +7,8 @@ import { NonAdminUser } from '../entity/NonAdminUser.js'
 import { MasterAccount } from '../entity/MasterAccount.js'
 import { Transaction } from '../entity/Transaction.js'
 import { EEntryType, TransactionLine } from '../entity/TransactionLine.js'
+import { format } from 'date-fns'
+import { instanceToPlain } from 'class-transformer'
 
 const router = express.Router()
 
@@ -54,11 +56,13 @@ router.get('/', withUserAuth, async (req, res) => {
 
   const userId = req.session.profile.ID
 
-  const txns = await txnRepository.find({
-    where: {
-      userID: userId,
-    },
-  })
+  const txns = (
+    await txnRepository.find({
+      where: {
+        userID: userId,
+      },
+    })
+  ).map((txn) => instanceToPlain(txn))
 
   res.json(txns)
 })
@@ -78,7 +82,6 @@ router.put('/id/:id', withUserAuth, async (req, res) => {
 
   const txn = await txnRepository.findOne({
     where: { ID: txnId },
-    relations: ['group', 'group.user'],
   })
 
   if (!txn) {
@@ -109,7 +112,12 @@ router.put('/id/:id', withUserAuth, async (req, res) => {
 
   await txnRepository.save(txn)
 
-  res.json(txn)
+  const updated = await txnRepository.findOneBy({ ID: txnId }) // Fix date
+  if (!updated) {
+    res.sendStatus(404)
+    return
+  }
+  res.json(instanceToPlain(updated))
 })
 
 router.delete('/id/:id', withUserAuth, async (req, res) => {
@@ -209,7 +217,7 @@ router.get('/id/:id', withUserAuth, async (req, res) => {
     return
   }
 
-  res.json(txn)
+  res.json(instanceToPlain(txn))
 })
 
 // Update a line

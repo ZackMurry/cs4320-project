@@ -3,6 +3,7 @@ import AddAccountDialog from '@/components/AddAccountDialog'
 import AddTransactionLineDialog from '@/components/AddTransactionLineDialog'
 import DashboardPage from '@/components/DashboardPage'
 import EditAccountDialog from '@/components/EditAccountDialog'
+import EditTransactionDialog from '@/components/EditTransactionDialog'
 import EditTransactionLineDialog from '@/components/EditTransactionLineDialog'
 import {
   Category,
@@ -12,17 +13,21 @@ import {
   MasterAccountResponse,
   NamedAccount,
   NamedGroup,
+  Transaction,
   TransactionLine,
 } from '@/lib/types'
 import {
   AlertDialog,
+  Box,
   Button,
+  Callout,
   Flex,
   Heading,
   IconButton,
   Table,
+  Text,
 } from '@radix-ui/themes'
-import { Edit, Trash2 } from 'lucide-react'
+import { Edit, Info, Trash2 } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
@@ -75,8 +80,7 @@ const ManageTransaction = () => {
   const params = useParams()
 
   const [error, setError] = useState('')
-  const [dialog, setDialog] = useState<'add' | 'edit' | null>(null)
-  const [groups, setGroups] = useState<NamedGroup[]>([])
+  const [dialog, setDialog] = useState<'add' | 'edit' | 'details' | null>(null)
   const [accounts, setAccounts] = useState<NamedAccount[]>()
   const [selectedLine, setSelectedLine] = useState<TransactionLine | null>(null)
   const [transaction, setTransaction] = useState<FullTransaction>()
@@ -100,7 +104,6 @@ const ManageTransaction = () => {
         const groupList = buildGroupArray(groups, categories).sort((a, b) =>
           a.fullName.localeCompare(b.fullName),
         )
-        setGroups(groupList)
         const aRes = await fetch('/api/v1/accounts')
         if (aRes.ok) {
           const acts = (await aRes.json()) as MasterAccountResponse[]
@@ -123,19 +126,53 @@ const ManageTransaction = () => {
     fetchAccounts()
   }, [params])
 
+  const handleDetailsEdit = (t: Transaction) => {
+    if (!transaction) return
+    setTransaction({ ...transaction, date: t.date, description: t.description })
+  }
+
   const handleAdd = (l: TransactionLine) => {
     if (!transaction) return
-    setTransaction({ ...transaction, lines: [...transaction.lines, l] })
+    const newTotalDebit =
+      transaction.totalDebit + (l.type === 'DEBIT' ? l.amount : 0)
+    const newTotalCredit =
+      transaction.totalCredit + (l.type === 'CREDIT' ? l.amount : 0)
+    setTransaction({
+      ...transaction,
+      lines: [...transaction.lines, l],
+      totalDebit: newTotalDebit,
+      totalCredit: newTotalCredit,
+    })
     setSelectedLine(null)
   }
   const handleEdit = (l: TransactionLine) => {
-    if (!transaction) {
+    if (!transaction || !selectedLine) {
       return
+    }
+    // Re-calculate total debits and credits for UI
+    const deltaAmt = l.amount - selectedLine.amount
+    let newTotalDebit =
+      transaction.totalDebit + (l.type === 'DEBIT' ? deltaAmt : 0)
+    let newTotalCredit =
+      transaction.totalCredit + (l.type === 'CREDIT' ? deltaAmt : 0)
+    if (l.type !== selectedLine.type) {
+      if (l.type === 'DEBIT') {
+        newTotalDebit = transaction.totalDebit + l.amount
+        newTotalCredit = transaction.totalCredit - selectedLine.amount
+      } else {
+        newTotalCredit = transaction.totalCredit + l.amount
+        newTotalDebit = transaction.totalDebit - selectedLine.amount
+      }
     }
     const idx = transaction.lines.findIndex((tl) => tl.ID === l.ID)
     const newTxns = [...transaction.lines]
     newTxns[idx] = l
-    setTransaction({ ...transaction, lines: newTxns })
+    setTransaction({
+      ...transaction,
+      lines: newTxns,
+      totalCredit: newTotalCredit,
+      totalDebit: newTotalDebit,
+    })
     setSelectedLine(null)
   }
 
@@ -161,9 +198,17 @@ const ManageTransaction = () => {
       },
     )
     if (res.ok) {
+      const newTotalDebit =
+        transaction.totalDebit -
+        (selectedLine.type === 'DEBIT' ? selectedLine.amount : 0)
+      const newTotalCredit =
+        transaction.totalCredit -
+        (selectedLine.type === 'CREDIT' ? selectedLine.amount : 0)
       setTransaction({
         ...transaction,
         lines: transaction.lines.filter((tl) => tl.ID !== selectedLine.ID),
+        totalDebit: newTotalDebit,
+        totalCredit: newTotalCredit,
       })
     } else {
       setError(`Failed to delete transaction line (code ${res.status})`)
@@ -176,6 +221,36 @@ const ManageTransaction = () => {
     <DashboardPage>
       <Heading>Manage Transaction</Heading>
       {error && <p className='text-red-500 text-sm'>{error}</p>}
+
+      {transaction && (
+        <Box my='3'>
+          <p>
+            <Text>Date: {transaction.formattedDate}</Text>
+          </p>
+          <p>
+            <Text>Description: {transaction.description}</Text>
+          </p>
+          <Button onClick={() => setDialog('details')} my='3'>
+            Edit Details
+          </Button>
+          <p>
+            <Text>Total debit: {fmt.format(transaction.totalDebit)}</Text>
+          </p>
+          <p>
+            <Text>Total credit: {fmt.format(transaction.totalCredit)}</Text>
+          </p>
+          {transaction.totalDebit !== transaction.totalCredit && (
+            <Callout.Root color='red' mt='3'>
+              <Callout.Icon>
+                <Info />
+              </Callout.Icon>
+              <Callout.Text>
+                The total debit does not match the total credit.
+              </Callout.Text>
+            </Callout.Root>
+          )}
+        </Box>
+      )}
 
       <Button onClick={() => setDialog('add')} my='3'>
         Add Line
@@ -198,6 +273,15 @@ const ManageTransaction = () => {
           onError={setError}
           accounts={accounts}
           transactionLine={selectedLine}
+        />
+      )}
+      {transaction && (
+        <EditTransactionDialog
+          isOpen={dialog === 'details'}
+          onEdit={handleDetailsEdit}
+          onClose={() => setDialog(null)}
+          onError={setError}
+          transaction={transaction}
         />
       )}
 

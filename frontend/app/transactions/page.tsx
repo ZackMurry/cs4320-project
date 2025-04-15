@@ -13,7 +13,6 @@ import {
 import { Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { MouseEvent, useEffect, useState } from 'react'
-import { format } from 'date-fns'
 
 const ManageTransactions = () => {
   const [error, setError] = useState('')
@@ -82,6 +81,8 @@ const ManageTransactions = () => {
             <Table.ColumnHeaderCell>ID</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Date</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Description</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>Total Debit</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>Total Credit</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell className='w-[100px]'>
               Delete
             </Table.ColumnHeaderCell>
@@ -118,10 +119,10 @@ const ManageTransactions = () => {
                   key={t.ID}
                 >
                   <Table.RowHeaderCell>{t.ID}</Table.RowHeaderCell>
-                  <Table.RowHeaderCell>
-                    {format(t.date, 'yyyy/MM/dd')}
-                  </Table.RowHeaderCell>
+                  <Table.RowHeaderCell>{t.formattedDate}</Table.RowHeaderCell>
                   <Table.Cell>{t.description}</Table.Cell>
+                  <Table.Cell>{t.totalCredit}</Table.Cell>
+                  <Table.Cell>{t.totalDebit}</Table.Cell>
                   {/* todo: total debit and credit */}
                   <Table.Cell>
                     <AlertDialog.Trigger>

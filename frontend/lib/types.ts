@@ -96,6 +96,9 @@ export interface Transaction {
   description: string
   date: string
   userID: number
+  formattedDate: string
+  totalCredit: number
+  totalDebit: number
 }
 
 export interface TransactionLine {

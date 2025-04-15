@@ -1,4 +1,4 @@
-import { NamedAccount, Transaction, TransactionLine } from '@/lib/types'
+import { NamedAccount, TransactionLine } from '@/lib/types'
 import { Button, Dialog, Flex, Select, Text, TextField } from '@radix-ui/themes'
 import { FC, useState } from 'react'
 
