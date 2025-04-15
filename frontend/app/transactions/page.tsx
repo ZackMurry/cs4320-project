@@ -1,5 +1,5 @@
 'use client'
-import AddTransactionDialog from '@/components/AddTransactionDialog'
+import AddTransactionDialog from '@/components/dialog/AddTransactionDialog'
 import DashboardPage from '@/components/DashboardPage'
 import { Transaction } from '@/lib/types'
 import {

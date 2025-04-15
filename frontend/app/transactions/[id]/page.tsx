@@ -1,10 +1,8 @@
 'use client'
-import AddAccountDialog from '@/components/AddAccountDialog'
-import AddTransactionLineDialog from '@/components/AddTransactionLineDialog'
+import AddTransactionLineDialog from '@/components/dialog/AddTransactionLineDialog'
 import DashboardPage from '@/components/DashboardPage'
-import EditAccountDialog from '@/components/EditAccountDialog'
-import EditTransactionDialog from '@/components/EditTransactionDialog'
-import EditTransactionLineDialog from '@/components/EditTransactionLineDialog'
+import EditTransactionDialog from '@/components/dialog/EditTransactionDialog'
+import EditTransactionLineDialog from '@/components/dialog/EditTransactionLineDialog'
 import {
   Category,
   FullTransaction,

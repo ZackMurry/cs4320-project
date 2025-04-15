@@ -1,7 +1,7 @@
 'use client'
-import AddAccountDialog from '@/components/AddAccountDialog'
+import AddAccountDialog from '@/components/dialog/AddAccountDialog'
 import DashboardPage from '@/components/DashboardPage'
-import EditAccountDialog from '@/components/EditAccountDialog'
+import EditAccountDialog from '@/components/dialog/EditAccountDialog'
 import {
   Category,
   Group,

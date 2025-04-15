@@ -6,7 +6,7 @@ import { Card, ContextMenu, Heading } from '@radix-ui/themes'
 import { Square, SquareMinus, SquarePlus } from 'lucide-react'
 import React, { useEffect, useMemo, useState } from 'react'
 import './styles.css'
-import AddGroupDialog from '@/components/AddGroupDialog'
+import AddGroupDialog from '@/components/dialog/AddGroupDialog'
 import {
   Category,
   CategoryTree,
@@ -14,8 +14,8 @@ import {
   GroupTree,
   GroupTreeResponse,
 } from '@/lib/types'
-import RenameGroupDialog from '@/components/RenameGroupDialog'
-import DeleteGroupDialog from '@/components/DeleteGroupDialog'
+import RenameGroupDialog from '@/components/dialog/RenameGroupDialog'
+import DeleteGroupDialog from '@/components/dialog/DeleteGroupDialog'
 
 let clickTime = 0
 
