@@ -3,13 +3,16 @@ import AddAccountDialog from '@/components/AddAccountDialog'
 import AddTransactionLineDialog from '@/components/AddTransactionLineDialog'
 import DashboardPage from '@/components/DashboardPage'
 import EditAccountDialog from '@/components/EditAccountDialog'
+import EditTransactionLineDialog from '@/components/EditTransactionLineDialog'
 import {
   Category,
   FullTransaction,
   Group,
   GroupTreeResponse,
   MasterAccountResponse,
+  NamedAccount,
   NamedGroup,
+  TransactionLine,
 } from '@/lib/types'
 import {
   AlertDialog,
@@ -61,17 +64,22 @@ const buildGroupArray = (
   }))
 }
 
+const fmt = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+})
+
 const ManageTransaction = () => {
   const params = useParams()
 
   const [error, setError] = useState('')
   const [dialog, setDialog] = useState<'add' | 'edit' | null>(null)
   const [groups, setGroups] = useState<NamedGroup[]>([])
-  const [accounts, setAccounts] = useState<MasterAccountResponse[]>()
-  const [selectedAccount, setSelectedAccount] =
-    useState<MasterAccountResponse | null>(null)
-
-  const [transaction, setTransaction] = useState<FullTransaction[]>()
+  const [accounts, setAccounts] = useState<NamedAccount[]>()
+  const [selectedLine, setSelectedLine] = useState<TransactionLine | null>(null)
+  const [transaction, setTransaction] = useState<FullTransaction>()
 
   useEffect(() => {
     const fetchTransaction = async () => {
@@ -85,7 +93,7 @@ const ManageTransaction = () => {
     }
     fetchTransaction()
 
-    const fetchGroups = async () => {
+    const fetchAccounts = async () => {
       const res = await fetch('/api/v1/groups')
       if (res.ok) {
         const { groups, categories } = (await res.json()) as GroupTreeResponse
@@ -93,63 +101,75 @@ const ManageTransaction = () => {
           a.fullName.localeCompare(b.fullName),
         )
         setGroups(groupList)
+        const aRes = await fetch('/api/v1/accounts')
+        if (aRes.ok) {
+          const acts = (await aRes.json()) as MasterAccountResponse[]
+          const namedActs = []
+          for (const act of acts) {
+            namedActs.push({
+              ID: act.ID,
+              fullName:
+                groupList.find((g) => g.id === act.groupID)?.fullName +
+                '\\' +
+                act.name,
+            })
+          }
+          setAccounts(namedActs)
+        }
       } else {
         setError('Failed to load groups')
-      }
-    }
-    fetchGroups()
-
-    const fetchAccounts = async () => {
-      const res = await fetch('/api/v1/accounts')
-      if (res.ok) {
-        const acts = (await res.json()) as MasterAccountResponse[]
-        setAccounts(acts)
       }
     }
     fetchAccounts()
   }, [params])
 
-  const handleAdd = (a: MasterAccountResponse) => {
-    setAccounts((acs) => [...(acs ?? []), a])
+  const handleAdd = (l: TransactionLine) => {
+    if (!transaction) return
+    setTransaction({ ...transaction, lines: [...transaction.lines, l] })
+    setSelectedLine(null)
   }
-  const handleEdit = (a: MasterAccountResponse) => {
-    if (!accounts) {
-      setAccounts([a])
+  const handleEdit = (l: TransactionLine) => {
+    if (!transaction) {
       return
     }
-    const idx = accounts.findIndex((ac) => ac.ID === a.ID)
-    const newAcs = [...accounts]
-    newAcs[idx] = a
-    setAccounts(newAcs)
-    setSelectedAccount(null)
+    const idx = transaction.lines.findIndex((tl) => tl.ID === l.ID)
+    const newTxns = [...transaction.lines]
+    newTxns[idx] = l
+    setTransaction({ ...transaction, lines: newTxns })
+    setSelectedLine(null)
   }
 
-  const handleEditAccount = (act: MasterAccountResponse) => {
-    setSelectedAccount(act)
+  const handleEditLine = (l: TransactionLine) => {
+    setSelectedLine(l)
     setDialog('edit')
   }
 
-  const handleDeleteAccount = (act: MasterAccountResponse) => {
-    setSelectedAccount(act)
+  const handleDeleteLine = (l: TransactionLine) => {
+    setSelectedLine(l)
   }
 
   const confirmDelete = async () => {
-    if (!accounts || !selectedAccount) {
-      setError('Failed to delete account: no account selected.')
-      setSelectedAccount(null)
+    if (!transaction || !selectedLine) {
+      setError('Failed to delete transaction line: no line selected.')
+      setSelectedLine(null)
       return
     }
-    const res = await fetch(`/api/v1/accounts/id/${selectedAccount.ID}`, {
-      method: 'DELETE',
-    })
+    const res = await fetch(
+      `/api/v1/transactions/lines/id/${selectedLine.ID}`,
+      {
+        method: 'DELETE',
+      },
+    )
     if (res.ok) {
-      const newAcs = [...accounts].filter((a) => a.ID !== selectedAccount.ID)
-      setAccounts(newAcs)
+      setTransaction({
+        ...transaction,
+        lines: transaction.lines.filter((tl) => tl.ID !== selectedLine.ID),
+      })
     } else {
-      setError(`Failed to delete account (code ${res.status})`)
+      setError(`Failed to delete transaction line (code ${res.status})`)
     }
 
-    setSelectedAccount(null)
+    setSelectedLine(null)
   }
 
   return (
@@ -160,22 +180,24 @@ const ManageTransaction = () => {
       <Button onClick={() => setDialog('add')} my='3'>
         Add Line
       </Button>
-      <AddTransactionLineDialog
-        isOpen={dialog === 'add'}
-        onAdd={() => null}
-        onClose={() => setDialog(null)}
-        onError={setError}
-        transactionID={Number(params.id)}
-        accounts={accounts}
-      />
-      {selectedAccount && (
-        <EditAccountDialog
+      {accounts && (
+        <AddTransactionLineDialog
+          isOpen={dialog === 'add'}
+          onAdd={handleAdd}
+          onClose={() => setDialog(null)}
+          onError={setError}
+          transactionID={Number(params.id)}
+          accounts={accounts}
+        />
+      )}
+      {accounts && selectedLine && (
+        <EditTransactionLineDialog
           isOpen={dialog === 'edit'}
           onEdit={handleEdit}
           onClose={() => setDialog(null)}
           onError={setError}
-          groups={groups}
-          account={selectedAccount}
+          accounts={accounts}
+          transactionLine={selectedLine}
         />
       )}
 
@@ -184,9 +206,9 @@ const ManageTransaction = () => {
           <Table.Row>
             <Table.ColumnHeaderCell>ID</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Account Name</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Opening Amount</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Closing amount</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Group Name</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>Type</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>Amount</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>Comment</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell className='w-[100px] '>
               Edit
             </Table.ColumnHeaderCell>
@@ -198,7 +220,7 @@ const ManageTransaction = () => {
 
         <AlertDialog.Root>
           <AlertDialog.Content maxWidth='450px'>
-            <AlertDialog.Title>Delete Account</AlertDialog.Title>
+            <AlertDialog.Title>Delete Transaction Line</AlertDialog.Title>
             <AlertDialog.Description size='2'>
               Are you sure? This account and all related transactions will be
               deleted.
@@ -212,30 +234,30 @@ const ManageTransaction = () => {
               </AlertDialog.Cancel>
               <AlertDialog.Action>
                 <Button variant='solid' color='red' onClick={confirmDelete}>
-                  Delete {selectedAccount?.name}
+                  Delete Line {selectedLine?.ID}
                 </Button>
               </AlertDialog.Action>
             </Flex>
           </AlertDialog.Content>
           <Table.Body>
-            {accounts &&
-              groups &&
-              accounts.map((a) => (
-                <Table.Row key={a.ID}>
-                  <Table.RowHeaderCell>{a.ID}</Table.RowHeaderCell>
-                  <Table.RowHeaderCell>{a.name}</Table.RowHeaderCell>
-                  <Table.Cell>{a.openingAmount}</Table.Cell>
-                  <Table.Cell>{a.closingAmount}</Table.Cell>
-                  <Table.Cell>
-                    {groups.findLast((g) => g.id === a.groupID)?.fullName ??
-                      'None'}
-                  </Table.Cell>
+            {transaction?.lines &&
+              accounts &&
+              transaction.lines.map((l) => (
+                <Table.Row key={l.ID}>
+                  <Table.RowHeaderCell>{l.ID}</Table.RowHeaderCell>
+                  <Table.RowHeaderCell>
+                    {accounts.find((a) => a.ID === l.accountID)?.fullName ??
+                      'Unknown'}
+                  </Table.RowHeaderCell>
+                  <Table.Cell>{l.type}</Table.Cell>
+                  <Table.Cell>{fmt.format(l.amount)}</Table.Cell>
+                  <Table.Cell>{l.comment}</Table.Cell>
                   <Table.Cell>
                     <IconButton variant='ghost' color='gray'>
                       <Edit
                         width='20px'
                         height='20px'
-                        onClick={() => handleEditAccount(a)}
+                        onClick={() => handleEditLine(l)}
                       />
                     </IconButton>
                   </Table.Cell>
@@ -244,7 +266,7 @@ const ManageTransaction = () => {
                       <IconButton
                         variant='ghost'
                         color='red'
-                        onClick={() => handleDeleteAccount(a)}
+                        onClick={() => handleDeleteLine(l)}
                       >
                         <Trash2 width='20px' height='20px' />
                       </IconButton>

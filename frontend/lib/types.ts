@@ -98,7 +98,21 @@ export interface Transaction {
   userID: number
 }
 
+export interface TransactionLine {
+  ID: number
+  amount: number
+  comment: string
+  transactionID: number
+  accountID: number
+  account: MasterAccount
+  type: 'CREDIT' | 'DEBIT'
+}
+
 export interface FullTransaction extends Transaction {
-  lines: number
-  // lines: TransactionLine
+  lines: TransactionLine[]
+}
+
+export interface NamedAccount {
+  ID: number
+  fullName: string
 }

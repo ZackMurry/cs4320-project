@@ -152,7 +152,8 @@ router.post('/id/:id/lines', withUserAuth, async (req, res) => {
     return
   }
 
-  const { transactionID, accountID, amount, comment, type } = req.body
+  const transactionID = parseInt(req.params.id, 10)
+  const { accountID, amount, comment, type } = req.body
 
   if (!transactionID || !accountID || !amount || !type) {
     res.sendStatus(400)
@@ -212,7 +213,7 @@ router.get('/id/:id', withUserAuth, async (req, res) => {
 })
 
 // Update a line
-router.put('/lines/:id', withUserAuth, async (req, res) => {
+router.put('/lines/id/:id', withUserAuth, async (req, res) => {
   const userId = req.session.profile?.ID
   if (!userId) {
     res.sendStatus(401)
@@ -251,7 +252,7 @@ router.put('/lines/:id', withUserAuth, async (req, res) => {
 })
 
 // Delete a line
-router.delete('/lines/:id', withUserAuth, async (req, res) => {
+router.delete('/lines/id/:id', withUserAuth, async (req, res) => {
   const userId = req.session.profile?.ID
   if (!userId) {
     res.sendStatus(401)

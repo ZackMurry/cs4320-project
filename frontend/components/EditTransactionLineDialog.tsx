@@ -6,23 +6,25 @@ interface Props {
   isOpen: boolean
   onClose: () => void
   onError: (er: string) => void
-  onAdd: (txnLine: TransactionLine) => void
-  transactionID: number
+  onEdit: (txnLine: TransactionLine) => void
   accounts: NamedAccount[]
+  transactionLine: TransactionLine
 }
 
-const AddTransactionLineDialog: FC<Props> = ({
+const EditTransactionLineDialog: FC<Props> = ({
   isOpen,
   onClose,
   onError,
-  onAdd,
-  transactionID,
+  onEdit,
   accounts,
+  transactionLine,
 }) => {
-  const [amount, setAmount] = useState('0')
-  const [type, setType] = useState<'CREDIT' | 'DEBIT'>('CREDIT')
-  const [comment, setComment] = useState('')
-  const [accountID, setAccountID] = useState<number | null>(null)
+  const [amount, setAmount] = useState(String(transactionLine.amount))
+  const [type, setType] = useState<'CREDIT' | 'DEBIT'>(transactionLine.type)
+  const [comment, setComment] = useState(transactionLine.comment)
+  const [accountID, setAccountID] = useState<number | null>(
+    transactionLine.accountID,
+  )
 
   const addTransactionLine = async () => {
     if (isNaN(Number(amount))) {
@@ -33,32 +35,35 @@ const AddTransactionLineDialog: FC<Props> = ({
       onError('You must select an account!')
       return
     }
-    const res = await fetch(`/api/v1/transactions/id/${transactionID}/lines`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    const res = await fetch(
+      `/api/v1/transactions/lines/id/${transactionLine.ID}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: Number(amount),
+          type,
+          comment,
+          accountID,
+        }),
       },
-      body: JSON.stringify({
-        amount: Number(amount),
-        type,
-        comment,
-        accountID,
-      }),
-    })
+    )
     if (res.ok) {
       const newLine = await res.json()
-      onAdd(newLine)
+      onEdit(newLine)
     } else {
-      onError('Error creating transaction line')
+      onError('Error editing transaction line')
     }
   }
 
   return (
     <Dialog.Root open={isOpen} onOpenChange={onClose}>
       <Dialog.Content maxWidth='450px' className='z-[100]'>
-        <Dialog.Title>Add Transaction Line</Dialog.Title>
+        <Dialog.Title>Edit Transaction Line</Dialog.Title>
         <Dialog.Description size='2' mb='4'>
-          Add a debit or credit entry to the transaction.
+          Change a debit or credit entry in the transaction.
         </Dialog.Description>
 
         <Flex direction='column' gap='3'>
@@ -70,6 +75,7 @@ const AddTransactionLineDialog: FC<Props> = ({
               onValueChange={(val) =>
                 val ? setAccountID(Number.parseInt(val)) : setAccountID(null)
               }
+              value={String(accountID) ?? undefined}
             >
               <Select.Trigger className='!min-w-[150px]' />
               <Select.Content>
@@ -135,4 +141,4 @@ const AddTransactionLineDialog: FC<Props> = ({
   )
 }
 
-export default AddTransactionLineDialog
+export default EditTransactionLineDialog
