@@ -8,6 +8,7 @@ import {
 } from 'typeorm'
 import { AccountGroup } from './AccountGroup.js'
 import { TransactionLine } from './TransactionLine.js'
+import { Expose } from 'class-transformer'
 
 @Entity()
 export class MasterAccount {

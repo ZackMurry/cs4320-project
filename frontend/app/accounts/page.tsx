@@ -201,38 +201,40 @@ const ManageChartOfAccounts = () => {
           <Table.Body>
             {accounts &&
               groups &&
-              accounts.map((a) => (
-                <Table.Row key={a.ID}>
-                  <Table.RowHeaderCell>{a.ID}</Table.RowHeaderCell>
-                  <Table.RowHeaderCell>{a.name}</Table.RowHeaderCell>
-                  <Table.Cell>{a.openingAmount}</Table.Cell>
-                  <Table.Cell>{a.closingAmount}</Table.Cell>
-                  <Table.Cell>
-                    {groups.findLast((g) => g.id === a.groupID)?.fullName ??
-                      'None'}
-                  </Table.Cell>
-                  <Table.Cell>
-                    <IconButton variant='ghost' color='gray'>
-                      <Edit
-                        width='20px'
-                        height='20px'
-                        onClick={() => handleEditAccount(a)}
-                      />
-                    </IconButton>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <AlertDialog.Trigger>
-                      <IconButton
-                        variant='ghost'
-                        color='red'
-                        onClick={() => handleDeleteAccount(a)}
-                      >
-                        <Trash2 width='20px' height='20px' />
+              accounts
+                .sort((a, b) => a.ID - b.ID)
+                .map((a) => (
+                  <Table.Row key={a.ID}>
+                    <Table.RowHeaderCell>{a.ID}</Table.RowHeaderCell>
+                    <Table.RowHeaderCell>{a.name}</Table.RowHeaderCell>
+                    <Table.Cell>{a.openingAmount}</Table.Cell>
+                    <Table.Cell>{a.closingAmount}</Table.Cell>
+                    <Table.Cell>
+                      {groups.findLast((g) => g.id === a.groupID)?.fullName ??
+                        'None'}
+                    </Table.Cell>
+                    <Table.Cell>
+                      <IconButton variant='ghost' color='gray'>
+                        <Edit
+                          width='20px'
+                          height='20px'
+                          onClick={() => handleEditAccount(a)}
+                        />
                       </IconButton>
-                    </AlertDialog.Trigger>
-                  </Table.Cell>
-                </Table.Row>
-              ))}
+                    </Table.Cell>
+                    <Table.Cell>
+                      <AlertDialog.Trigger>
+                        <IconButton
+                          variant='ghost'
+                          color='red'
+                          onClick={() => handleDeleteAccount(a)}
+                        >
+                          <Trash2 width='20px' height='20px' />
+                        </IconButton>
+                      </AlertDialog.Trigger>
+                    </Table.Cell>
+                  </Table.Row>
+                ))}
           </Table.Body>
         </AlertDialog.Root>
       </Table.Root>

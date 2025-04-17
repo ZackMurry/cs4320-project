@@ -1,4 +1,7 @@
 import {
+  AfterInsert,
+  AfterRemove,
+  AfterUpdate,
   Column,
   Entity,
   JoinColumn,
@@ -7,6 +10,7 @@ import {
 } from 'typeorm'
 import { Transaction } from './Transaction.js'
 import { MasterAccount } from './MasterAccount.js'
+import { recalculateClosingAmount } from '../util/recalculateClosingAmount.js'
 
 export enum EEntryType {
   DEBIT = 'DEBIT',
@@ -44,4 +48,11 @@ export class TransactionLine {
     enumName: 'entry_type_enum',
   })
   type: EEntryType
+
+  @AfterInsert()
+  @AfterUpdate()
+  @AfterRemove()
+  async updateMasterAccountClosingAmount() {
+    await recalculateClosingAmount(this.accountID)
+  }
 }
