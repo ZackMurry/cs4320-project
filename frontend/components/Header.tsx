@@ -46,7 +46,7 @@ const Header: React.FC = () => {
                 variant='outline'
                 className='text-white !cursor-pointer'
               >
-                <CircleUser size='lg' className='text-white' />
+                <CircleUser size='48' className='text-white' />
               </IconButton>
             </DropdownMenu.Trigger>
             <DropdownMenu.Content>

@@ -112,31 +112,33 @@ const ManageTransactions = () => {
           </AlertDialog.Content>
           <Table.Body>
             {transactions &&
-              transactions.map((t) => (
-                <Table.Row
-                  onClick={() => router.push(`/transactions/${t.ID}`)}
-                  className='cursor-pointer'
-                  key={t.ID}
-                >
-                  <Table.RowHeaderCell>{t.ID}</Table.RowHeaderCell>
-                  <Table.RowHeaderCell>{t.formattedDate}</Table.RowHeaderCell>
-                  <Table.Cell>{t.description}</Table.Cell>
-                  <Table.Cell>{t.totalCredit}</Table.Cell>
-                  <Table.Cell>{t.totalDebit}</Table.Cell>
-                  {/* todo: total debit and credit */}
-                  <Table.Cell>
-                    <AlertDialog.Trigger>
-                      <IconButton
-                        variant='ghost'
-                        color='red'
-                        onClick={(e) => handleDeleteTransaction(e, t)}
-                      >
-                        <Trash2 width='20px' height='20px' />
-                      </IconButton>
-                    </AlertDialog.Trigger>
-                  </Table.Cell>
-                </Table.Row>
-              ))}
+              transactions
+                .sort((a, b) => a.ID - b.ID)
+                .map((t) => (
+                  <Table.Row
+                    onClick={() => router.push(`/transactions/${t.ID}`)}
+                    className='cursor-pointer'
+                    key={t.ID}
+                  >
+                    <Table.RowHeaderCell>{t.ID}</Table.RowHeaderCell>
+                    <Table.RowHeaderCell>{t.formattedDate}</Table.RowHeaderCell>
+                    <Table.Cell>{t.description}</Table.Cell>
+                    <Table.Cell>{t.totalCredit}</Table.Cell>
+                    <Table.Cell>{t.totalDebit}</Table.Cell>
+                    {/* todo: total debit and credit */}
+                    <Table.Cell>
+                      <AlertDialog.Trigger>
+                        <IconButton
+                          variant='ghost'
+                          color='red'
+                          onClick={(e) => handleDeleteTransaction(e, t)}
+                        >
+                          <Trash2 width='20px' height='20px' />
+                        </IconButton>
+                      </AlertDialog.Trigger>
+                    </Table.Cell>
+                  </Table.Row>
+                ))}
           </Table.Body>
         </AlertDialog.Root>
       </Table.Root>

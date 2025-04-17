@@ -17,7 +17,9 @@ const AddTransactionDialog: FC<Props> = ({
   onAdd,
 }) => {
   const [description, setDescription] = useState('')
-  const [date, setDate] = useState<string>('')
+  const [date, setDate] = useState<string>(() =>
+    format(new Date(), 'yyyy/MM/dd'),
+  )
 
   const addTransaction = async () => {
     if (!date) {

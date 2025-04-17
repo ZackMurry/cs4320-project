@@ -31,14 +31,18 @@ export class TransactionLine {
   @Column()
   transactionID: number
 
-  @ManyToOne('Transaction', (t: Transaction) => t.lines)
+  @ManyToOne('Transaction', (t: Transaction) => t.lines, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'transactionID' })
   transaction: Transaction
 
   @Column()
   accountID: number
 
-  @ManyToOne('MasterAccount', (ma: MasterAccount) => ma.transactionLines)
+  @ManyToOne('MasterAccount', (ma: MasterAccount) => ma.transactionLines, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'accountID' })
   account: MasterAccount
 

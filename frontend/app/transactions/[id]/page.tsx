@@ -324,38 +324,40 @@ const ManageTransaction = () => {
           <Table.Body>
             {transaction?.lines &&
               accounts &&
-              transaction.lines.map((l) => (
-                <Table.Row key={l.ID}>
-                  <Table.RowHeaderCell>{l.ID}</Table.RowHeaderCell>
-                  <Table.RowHeaderCell>
-                    {accounts.find((a) => a.ID === l.accountID)?.fullName ??
-                      'Unknown'}
-                  </Table.RowHeaderCell>
-                  <Table.Cell>{l.type}</Table.Cell>
-                  <Table.Cell>{fmt.format(l.amount)}</Table.Cell>
-                  <Table.Cell>{l.comment}</Table.Cell>
-                  <Table.Cell>
-                    <IconButton variant='ghost' color='gray'>
-                      <Edit
-                        width='20px'
-                        height='20px'
-                        onClick={() => handleEditLine(l)}
-                      />
-                    </IconButton>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <AlertDialog.Trigger>
-                      <IconButton
-                        variant='ghost'
-                        color='red'
-                        onClick={() => handleDeleteLine(l)}
-                      >
-                        <Trash2 width='20px' height='20px' />
+              transaction.lines
+                .sort((a, b) => a.ID - b.ID)
+                .map((l) => (
+                  <Table.Row key={l.ID}>
+                    <Table.RowHeaderCell>{l.ID}</Table.RowHeaderCell>
+                    <Table.RowHeaderCell>
+                      {accounts.find((a) => a.ID === l.accountID)?.fullName ??
+                        'Unknown'}
+                    </Table.RowHeaderCell>
+                    <Table.Cell>{l.type}</Table.Cell>
+                    <Table.Cell>{fmt.format(l.amount)}</Table.Cell>
+                    <Table.Cell>{l.comment}</Table.Cell>
+                    <Table.Cell>
+                      <IconButton variant='ghost' color='gray'>
+                        <Edit
+                          width='20px'
+                          height='20px'
+                          onClick={() => handleEditLine(l)}
+                        />
                       </IconButton>
-                    </AlertDialog.Trigger>
-                  </Table.Cell>
-                </Table.Row>
-              ))}
+                    </Table.Cell>
+                    <Table.Cell>
+                      <AlertDialog.Trigger>
+                        <IconButton
+                          variant='ghost'
+                          color='red'
+                          onClick={() => handleDeleteLine(l)}
+                        >
+                          <Trash2 width='20px' height='20px' />
+                        </IconButton>
+                      </AlertDialog.Trigger>
+                    </Table.Cell>
+                  </Table.Row>
+                ))}
           </Table.Body>
         </AlertDialog.Root>
       </Table.Root>

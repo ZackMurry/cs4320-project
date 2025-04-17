@@ -24,7 +24,7 @@ export class Transaction {
   user: NonAdminUser
 
   @Column({ type: 'date', nullable: true })
-  date: Date
+  date: string
 
   @Column({ type: 'text' })
   description: string
@@ -36,26 +36,26 @@ export class Transaction {
 
   @Expose()
   get formattedDate(): string | null {
-    return this.date ? format(this.date, 'yyyy/MM/dd') : null
+    return this.date ? this.date.replaceAll('-', '/') : null
   }
 
   @Expose()
   get totalDebit(): number {
-    if (!this.lines) return 0
+    if (!this.lines || !this.lines.length) return 0
     const result = this.lines
       .filter((line) => line.type === 'DEBIT')
       .map((line) => Number(line.amount))
-      .reduce((acc, cur) => acc + cur)
+      .reduce((acc, cur) => acc + cur, 0)
     return result
   }
 
   @Expose()
   get totalCredit(): number {
-    if (!this.lines) return 0
+    if (!this.lines || !this.lines.length) return 0
     const result = this.lines
       .filter((line) => line.type === 'CREDIT')
       .map((line) => Number(line.amount))
-      .reduce((acc, cur) => acc + cur)
+      .reduce((acc, cur) => acc + cur, 0)
     return result
   }
 }

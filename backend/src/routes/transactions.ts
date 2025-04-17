@@ -9,6 +9,7 @@ import { Transaction } from '../entity/Transaction.js'
 import { EEntryType, TransactionLine } from '../entity/TransactionLine.js'
 import { format } from 'date-fns'
 import { instanceToPlain } from 'class-transformer'
+import { recalculateClosingAmount } from '../util/recalculateClosingAmount.js'
 
 const router = express.Router()
 
@@ -40,12 +41,17 @@ router.post('/', withUserAuth, async (req, res) => {
   }
 
   const txn = new Transaction()
-  txn.date = txnDate
+  txn.date = format(txnDate, 'yyyy/MM/dd')
   txn.description = description
   txn.userID = userId
   await txnRepository.save(txn)
 
-  res.json(txn)
+  const updated = await txnRepository.findOneBy({ ID: txn.ID }) // Fix date
+  if (!updated) {
+    res.sendStatus(404)
+    return
+  }
+  res.json(instanceToPlain(updated))
 })
 
 router.get('/', withUserAuth, async (req, res) => {
@@ -108,7 +114,7 @@ router.put('/id/:id', withUserAuth, async (req, res) => {
   }
 
   txn.description = description
-  txn.date = txnDate
+  txn.date = format(txnDate, 'yyyy/MM/dd')
 
   await txnRepository.save(txn)
 
@@ -149,6 +155,11 @@ router.delete('/id/:id', withUserAuth, async (req, res) => {
 
   await txnRepository.delete(txnId)
 
+  const promises = []
+  for (const line of txn.lines) {
+    promises.push(recalculateClosingAmount(line.accountID))
+  }
+  await Promise.all(promises)
   res.sendStatus(200)
 })
 
@@ -191,6 +202,7 @@ router.post('/id/:id/lines', withUserAuth, async (req, res) => {
   line.type = type
 
   await txnLineRepository.save(line)
+  await recalculateClosingAmount(line.accountID)
   res.json(line)
 })
 
@@ -244,7 +256,7 @@ router.put('/lines/id/:id', withUserAuth, async (req, res) => {
     return
   }
 
-  const { amount, comment, type } = req.body
+  const { accountID, amount, comment, type } = req.body
 
   if (amount !== undefined && !isNaN(line.amount)) line.amount = amount
   if (comment !== undefined) line.comment = comment
@@ -254,8 +266,13 @@ router.put('/lines/id/:id', withUserAuth, async (req, res) => {
   ) {
     line.type = type
   }
+  const oldAccount = line.accountID
+  if (accountID !== undefined && accountID !== oldAccount) {
+    line.accountID = accountID
+  }
 
   await txnLineRepository.save(line)
+  await recalculateClosingAmount(oldAccount)
   res.json(line)
 })
 
@@ -284,6 +301,7 @@ router.delete('/lines/id/:id', withUserAuth, async (req, res) => {
   }
 
   await txnLineRepository.delete(lineId)
+  await recalculateClosingAmount(line.accountID)
   res.sendStatus(200)
 })
 

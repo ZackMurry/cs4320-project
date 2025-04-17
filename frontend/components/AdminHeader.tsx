@@ -28,7 +28,7 @@ const AdminHeader: React.FC = () => {
                 variant='outline'
                 className='text-white !cursor-pointer'
               >
-                <ShieldUser size='lg' className='text-white' />
+                <ShieldUser size='48' className='text-white' />
               </IconButton>
             </DropdownMenu.Trigger>
             <DropdownMenu.Content>
