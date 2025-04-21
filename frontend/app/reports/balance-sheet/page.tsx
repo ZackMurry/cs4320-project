@@ -2,7 +2,8 @@
 
 import DashboardPage from '@/components/DashboardPage'
 import { FullMasterAccount } from '@/lib/types'
-import { Heading, Table } from '@radix-ui/themes'
+import { Button, Heading, Table, Text } from '@radix-ui/themes'
+import { Printer } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 const fmt = new Intl.NumberFormat('en-US', {
@@ -15,6 +16,7 @@ const fmt = new Intl.NumberFormat('en-US', {
 const BalanceSheetPage = () => {
   const [error, setError] = useState<string>('')
   const [accounts, setAccounts] = useState<FullMasterAccount[]>([])
+  const [now, setNow] = useState<string>('')
 
   useEffect(() => {
     const fetchAccounts = async () => {
@@ -27,6 +29,7 @@ const BalanceSheetPage = () => {
       }
     }
     fetchAccounts()
+    setNow(new Date().toLocaleString())
   }, [])
 
   const assets = accounts.filter((acc) => acc.group.category.name === 'Assets')
@@ -40,9 +43,15 @@ const BalanceSheetPage = () => {
   return (
     <DashboardPage>
       <Heading mb='3'>Balance Sheet</Heading>
+      <div className='mb-3'>
+        <Text>Generated: {now}</Text>
+      </div>
       {error && <p className='text-red-500 text-sm'>{error}</p>}
+      <Button onClick={() => window.print()} className='mb-4 no-print'>
+        Print <Printer width='18' height='18' />
+      </Button>
 
-      <div className='grid grid-cols-2 gap-10'>
+      <div className='grid grid-cols-2 gap-10 mt-4'>
         {/* Left Column: Assets */}
         <div>
           <h2 className='text-lg font-semibold mb-2'>Assets</h2>

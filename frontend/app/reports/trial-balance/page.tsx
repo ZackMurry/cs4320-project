@@ -2,8 +2,8 @@
 
 import DashboardPage from '@/components/DashboardPage'
 import { CategoryType, FullMasterAccount } from '@/lib/types'
-import { Callout, Heading, Table } from '@radix-ui/themes'
-import { Info } from 'lucide-react'
+import { Button, Callout, Heading, Table, Text } from '@radix-ui/themes'
+import { Info, Printer } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 const fmt = new Intl.NumberFormat('en-US', {
@@ -16,6 +16,7 @@ const fmt = new Intl.NumberFormat('en-US', {
 const TrialBalancePage = () => {
   const [error, setError] = useState<string>('')
   const [accounts, setAccounts] = useState<FullMasterAccount[]>([])
+  const [now, setNow] = useState<string>('')
 
   useEffect(() => {
     const fetchAccounts = async () => {
@@ -28,6 +29,7 @@ const TrialBalancePage = () => {
       }
     }
     fetchAccounts()
+    setNow(new Date().toLocaleString())
   }, [])
 
   const sumType = (acType: CategoryType, otherType: CategoryType) =>
@@ -53,7 +55,13 @@ const TrialBalancePage = () => {
   return (
     <DashboardPage>
       <Heading mb='3'>Trial Balance Report</Heading>
+      <div className='mb-3'>
+        <Text>Generated: {now}</Text>
+      </div>
       {error && <p className='text-red-500 text-sm'>{error}</p>}
+      <Button onClick={() => window.print()} className='mb-4 no-print'>
+        Print <Printer width='18' height='18' />
+      </Button>
       {totalDebit !== totalCredit && (
         <Callout.Root color='red' my='3'>
           <Callout.Icon>
@@ -64,7 +72,7 @@ const TrialBalancePage = () => {
           </Callout.Text>
         </Callout.Root>
       )}
-      <Table.Root variant='surface'>
+      <Table.Root variant='surface' className='mt-4'>
         <Table.Header>
           <Table.Row>
             <Table.ColumnHeaderCell>Account Name</Table.ColumnHeaderCell>

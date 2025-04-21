@@ -26,3 +26,15 @@ body {
   --cursor-button: pointer;
   --cursor-disabled: not-allowed;
 }
+
+@media print {
+  header,
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+    color: black;
+  }
+}

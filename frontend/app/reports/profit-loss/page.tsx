@@ -2,7 +2,8 @@
 
 import DashboardPage from '@/components/DashboardPage'
 import { FullMasterAccount } from '@/lib/types'
-import { Heading, Table } from '@radix-ui/themes'
+import { Button, Heading, Table, Text } from '@radix-ui/themes'
+import { Printer } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 const fmt = new Intl.NumberFormat('en-US', {
@@ -15,6 +16,7 @@ const fmt = new Intl.NumberFormat('en-US', {
 const ProfitAndLossPage = () => {
   const [error, setError] = useState<string>('')
   const [accounts, setAccounts] = useState<FullMasterAccount[]>([])
+  const [now, setNow] = useState<string>('')
 
   useEffect(() => {
     const fetchAccounts = async () => {
@@ -27,6 +29,7 @@ const ProfitAndLossPage = () => {
       }
     }
     fetchAccounts()
+    setNow(new Date().toLocaleString())
   }, [])
 
   const incomeAccounts = accounts.filter(
@@ -46,8 +49,14 @@ const ProfitAndLossPage = () => {
   return (
     <DashboardPage>
       <Heading mb='3'>Profit and Loss Statement</Heading>
+      <div className='mb-3'>
+        <Text>Generated: {now}</Text>
+      </div>
       {error && <p className='text-red-500 text-sm'>{error}</p>}
-      <Table.Root variant='surface'>
+      <Button onClick={() => window.print()} className='mb-4 no-print'>
+        Print <Printer width='18' height='18' />
+      </Button>
+      <Table.Root variant='surface' className='mt-4'>
         <Table.Header>
           <Table.Row>
             <Table.ColumnHeaderCell>Category</Table.ColumnHeaderCell>
