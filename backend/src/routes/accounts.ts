@@ -62,7 +62,7 @@ router.get('/', withUserAuth, async (req, res) => {
   const userId = req.session.profile.ID
 
   const accounts = await accountRepository.find({
-    relations: ['group', 'group.user'],
+    relations: ['group', 'group.user', 'group.category'],
     where: {
       group: {
         user: {

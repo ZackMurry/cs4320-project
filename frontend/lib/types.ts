@@ -119,3 +119,12 @@ export interface NamedAccount {
   ID: number
   fullName: string
 }
+
+export interface FullMasterAccount {
+  ID: 3
+  name: string
+  openingAmount: number
+  closingAmount: number
+  groupID: number
+  group: Group & { category: Category }
+}
