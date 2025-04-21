@@ -10,7 +10,7 @@ const Header: React.FC = () => {
         {/* Logo */}
         <div className='text-2xl font-bold'>
           <h1>
-            <Link href='/'>iFINANCE</Link>
+            <Link href='/home'>iFINANCE</Link>
           </h1>
         </div>
 

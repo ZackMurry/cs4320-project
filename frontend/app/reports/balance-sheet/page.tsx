@@ -5,6 +5,13 @@ import { FullMasterAccount } from '@/lib/types'
 import { Heading, Table } from '@radix-ui/themes'
 import { useEffect, useState } from 'react'
 
+const fmt = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+})
+
 const BalanceSheetPage = () => {
   const [error, setError] = useState<string>('')
   const [accounts, setAccounts] = useState<FullMasterAccount[]>([])
@@ -44,12 +51,12 @@ const BalanceSheetPage = () => {
               {assets.map((acc) => (
                 <Table.Row key={acc.ID}>
                   <Table.Cell>{acc.name}</Table.Cell>
-                  <Table.Cell>{acc.closingAmount.toFixed(2)}</Table.Cell>
+                  <Table.Cell>{fmt.format(acc.closingAmount)}</Table.Cell>
                 </Table.Row>
               ))}
               <Table.Row className='font-bold'>
                 <Table.Cell>Total Assets</Table.Cell>
-                <Table.Cell>{total(assets).toFixed(2)}</Table.Cell>
+                <Table.Cell>{fmt.format(total(assets))}</Table.Cell>
               </Table.Row>
             </Table.Body>
           </Table.Root>
@@ -63,12 +70,12 @@ const BalanceSheetPage = () => {
               {liabilities.map((acc) => (
                 <Table.Row key={acc.ID}>
                   <Table.Cell>{acc.name}</Table.Cell>
-                  <Table.Cell>{acc.closingAmount.toFixed(2)}</Table.Cell>
+                  <Table.Cell>{fmt.format(acc.closingAmount)}</Table.Cell>
                 </Table.Row>
               ))}
               <Table.Row className='font-bold'>
                 <Table.Cell>Total Liabilities</Table.Cell>
-                <Table.Cell>{total(liabilities).toFixed(2)}</Table.Cell>
+                <Table.Cell>{fmt.format(total(liabilities))}</Table.Cell>
               </Table.Row>
             </Table.Body>
           </Table.Root>
@@ -81,16 +88,16 @@ const BalanceSheetPage = () => {
           <Table.Body>
             <Table.Row>
               <Table.Cell>Total Assets</Table.Cell>
-              <Table.Cell>{total(assets).toFixed(2)}</Table.Cell>
+              <Table.Cell>{fmt.format(total(assets))}</Table.Cell>
             </Table.Row>
             <Table.Row>
               <Table.Cell>Total Liabilities</Table.Cell>
-              <Table.Cell>{total(liabilities).toFixed(2)}</Table.Cell>
+              <Table.Cell>{fmt.format(total(liabilities))}</Table.Cell>
             </Table.Row>
             <Table.Row className='font-bold'>
               <Table.Cell>Assets - Liabilities</Table.Cell>
               <Table.Cell>
-                {(total(assets) - total(liabilities)).toFixed(2)}
+                {fmt.format(total(assets) - total(liabilities))}
               </Table.Cell>
             </Table.Row>
           </Table.Body>

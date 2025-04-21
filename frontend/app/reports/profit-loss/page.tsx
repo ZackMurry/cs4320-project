@@ -5,6 +5,13 @@ import { FullMasterAccount } from '@/lib/types'
 import { Heading, Table } from '@radix-ui/themes'
 import { useEffect, useState } from 'react'
 
+const fmt = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+})
+
 const ProfitAndLossPage = () => {
   const [error, setError] = useState<string>('')
   const [accounts, setAccounts] = useState<FullMasterAccount[]>([])
@@ -54,7 +61,7 @@ const ProfitAndLossPage = () => {
               <Table.Cell>{acc.group.category.name}</Table.Cell>
               <Table.Cell>{acc.name}</Table.Cell>
               <Table.Cell>
-                {(acc.closingAmount - acc.openingAmount).toFixed(2)}
+                {fmt.format(acc.closingAmount - acc.openingAmount)}
               </Table.Cell>
             </Table.Row>
           ))}
@@ -63,7 +70,7 @@ const ProfitAndLossPage = () => {
               <Table.Cell>{acc.group.category.name}</Table.Cell>
               <Table.Cell>{acc.name}</Table.Cell>
               <Table.Cell>
-                {(acc.closingAmount - acc.openingAmount).toFixed(2)}
+                {fmt.format(acc.closingAmount - acc.openingAmount)}
               </Table.Cell>
             </Table.Row>
           ))}
@@ -71,21 +78,21 @@ const ProfitAndLossPage = () => {
             <Table.Cell className='font-bold'>Totals</Table.Cell>
             <Table.Cell className='font-bold'>Total Income</Table.Cell>
             <Table.Cell className='font-bold'>
-              {totalIncome.toFixed(2)}
+              {fmt.format(totalIncome)}
             </Table.Cell>
           </Table.Row>
           <Table.Row>
             <Table.Cell className='font-bold'></Table.Cell>
             <Table.Cell className='font-bold'>Total Expenses</Table.Cell>
             <Table.Cell className='font-bold'>
-              {totalExpenses.toFixed(2)}
+              {fmt.format(totalExpenses)}
             </Table.Cell>
           </Table.Row>
           <Table.Row>
             <Table.Cell className='font-bold'>Net Profit</Table.Cell>
             <Table.Cell></Table.Cell>
             <Table.Cell className='font-bold'>
-              {netProfit.toFixed(2)}
+              {fmt.format(netProfit)}
             </Table.Cell>
           </Table.Row>
         </Table.Body>

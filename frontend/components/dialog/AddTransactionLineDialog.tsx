@@ -23,7 +23,6 @@ const AddTransactionLineDialog: FC<Props> = ({
   const [type, setType] = useState<'CREDIT' | 'DEBIT'>('CREDIT')
   const [comment, setComment] = useState('')
   const [accountID, setAccountID] = useState<number | null>(null)
-  // todo: VIAMN lab has two \\
 
   const addTransactionLine = async () => {
     if (isNaN(Number(amount))) {
@@ -49,6 +48,10 @@ const AddTransactionLineDialog: FC<Props> = ({
     if (res.ok) {
       const newLine = await res.json()
       onAdd(newLine)
+      setAmount('0')
+      setType('CREDIT')
+      setComment('')
+      setAccountID(null)
     } else {
       onError('Error creating transaction line')
     }

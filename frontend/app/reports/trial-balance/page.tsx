@@ -6,6 +6,13 @@ import { Callout, Heading, Table } from '@radix-ui/themes'
 import { Info } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
+const fmt = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+})
+
 const TrialBalancePage = () => {
   const [error, setError] = useState<string>('')
   const [accounts, setAccounts] = useState<FullMasterAccount[]>([])
@@ -48,7 +55,7 @@ const TrialBalancePage = () => {
       <Heading mb='3'>Trial Balance Report</Heading>
       {error && <p className='text-red-500 text-sm'>{error}</p>}
       {totalDebit !== totalCredit && (
-        <Callout.Root color='red' mt='3'>
+        <Callout.Root color='red' my='3'>
           <Callout.Icon>
             <Info />
           </Callout.Icon>
@@ -80,18 +87,22 @@ const TrialBalancePage = () => {
               <Table.Row key={acc.ID}>
                 <Table.Cell>{acc.name}</Table.Cell>
                 <Table.Cell>
-                  {type === 'DEBIT' ? Math.abs(dAmount) : ''}
+                  {type === 'DEBIT' ? fmt.format(Math.abs(dAmount)) : ''}
                 </Table.Cell>
                 <Table.Cell>
-                  {type === 'CREDIT' ? Math.abs(dAmount) : ''}
+                  {type === 'CREDIT' ? fmt.format(Math.abs(dAmount)) : ''}
                 </Table.Cell>
               </Table.Row>
             )
           })}
           <Table.Row>
             <Table.Cell className='font-bold'>Totals</Table.Cell>
-            <Table.Cell className='font-bold'>{totalDebit}</Table.Cell>
-            <Table.Cell className='font-bold'>{totalCredit}</Table.Cell>
+            <Table.Cell className='font-bold'>
+              {fmt.format(totalDebit)}
+            </Table.Cell>
+            <Table.Cell className='font-bold'>
+              {fmt.format(totalCredit)}
+            </Table.Cell>
           </Table.Row>
         </Table.Body>
       </Table.Root>
