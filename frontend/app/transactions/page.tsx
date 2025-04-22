@@ -61,7 +61,7 @@ const ManageTransactions = () => {
   }
 
   return (
-    <DashboardPage>
+    <DashboardPage error={error} onCloseError={() => setError('')}>
       <Heading>Manage Transactions</Heading>
       {error && <p className='text-red-500 text-sm'>{error}</p>}
 

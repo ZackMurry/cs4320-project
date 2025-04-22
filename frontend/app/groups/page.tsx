@@ -171,9 +171,8 @@ const ManageAccountGroups = () => {
   console.log(tree)
 
   return (
-    <DashboardPage>
+    <DashboardPage error={error} onCloseError={() => setError('')}>
       <Heading>Custom Account Groups Form</Heading>
-      {error && <p className='text-red-500 text-sm'>{error}</p>}
       <ContextMenu.Root>
         <Card my='5'>
           <ContextMenu.Trigger>

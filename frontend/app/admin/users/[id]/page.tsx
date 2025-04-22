@@ -87,7 +87,7 @@ const AdminUserPage: FC = () => {
   }, [setUser, params.id])
 
   return (
-    <DashboardPage isAdmin>
+    <DashboardPage isAdmin error={error} onCloseError={() => setError('')}>
       <div className='mx-auto max-w-[500px]'>
         <Heading className='py-5'>Edit User Profile</Heading>
         {error && <p className='text-red-500 text-sm'>{error}</p>}

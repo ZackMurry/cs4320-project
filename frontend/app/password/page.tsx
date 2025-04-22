@@ -50,7 +50,7 @@ const ChangePasswordPage: FC = () => {
   }
 
   return (
-    <DashboardPage>
+    <DashboardPage error={error} onCloseError={() => setError('')}>
       <div className='mx-auto max-w-[500px]'>
         <Heading className='py-5'>Change Password</Heading>
         {error && <p className='text-red-500 text-sm'>{error}</p>}

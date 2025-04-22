@@ -53,12 +53,11 @@ const TrialBalancePage = () => {
   const totalCredit = sumType('CREDIT', 'DEBIT')
 
   return (
-    <DashboardPage>
+    <DashboardPage error={error} onCloseError={() => setError('')}>
       <Heading mb='3'>Trial Balance Report</Heading>
       <div className='mb-3'>
         <Text>Generated: {now}</Text>
       </div>
-      {error && <p className='text-red-500 text-sm'>{error}</p>}
       <Button onClick={() => window.print()} className='mb-4 no-print'>
         Print <Printer width='18' height='18' />
       </Button>

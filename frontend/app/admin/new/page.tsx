@@ -39,8 +39,8 @@ const AdminDashboard: FC = () => {
     email: '',
     address: '',
   })
-
   const [role, setRole] = useState<'user' | 'admin'>('user')
+  const [error, setError] = useState('')
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -77,7 +77,7 @@ const AdminDashboard: FC = () => {
         // You can handle the success response here (e.g., redirect, show message)
         window.location.reload()
       } else {
-        console.error('Error creating user')
+        setError('Error creating user')
         // Handle error response here
       }
     } catch (error) {
@@ -86,7 +86,7 @@ const AdminDashboard: FC = () => {
   }
 
   return (
-    <DashboardPage isAdmin>
+    <DashboardPage isAdmin error={error} onCloseError={() => setError('')}>
       <div className='mx-auto max-w-[500px]'>
         <Heading className='py-5'>Create New User</Heading>
 

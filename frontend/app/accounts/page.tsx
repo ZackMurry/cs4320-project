@@ -135,9 +135,8 @@ const ManageChartOfAccounts = () => {
   }
 
   return (
-    <DashboardPage>
+    <DashboardPage error={error} onCloseError={() => setError('')}>
       <Heading>Manage Chart of Accounts</Heading>
-      {error && <p className='text-red-500 text-sm'>{error}</p>}
 
       <Button onClick={() => setDialog('add')} my='3'>
         Create Account

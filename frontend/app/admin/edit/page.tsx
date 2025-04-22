@@ -79,10 +79,9 @@ const EditAdminPage: FC = () => {
   }, [setUser])
 
   return (
-    <DashboardPage isAdmin>
+    <DashboardPage isAdmin error={error} onCloseError={() => setError('')}>
       <div className='mx-auto max-w-[500px]'>
         <Heading className='py-5'>Edit Administrator Account</Heading>
-        {error && <p className='text-red-500 text-sm'>{error}</p>}
         {user && (
           <Form.Root
             onSubmit={handleSubmit}

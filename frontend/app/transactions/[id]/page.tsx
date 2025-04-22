@@ -216,9 +216,8 @@ const ManageTransaction = () => {
   }
 
   return (
-    <DashboardPage>
+    <DashboardPage error={error} onCloseError={() => setError('')}>
       <Heading>Manage Transaction</Heading>
-      {error && <p className='text-red-500 text-sm'>{error}</p>}
 
       {transaction && (
         <Box my='3'>

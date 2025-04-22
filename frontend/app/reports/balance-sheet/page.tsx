@@ -41,7 +41,7 @@ const BalanceSheetPage = () => {
     list.reduce((sum, acc) => sum + acc.closingAmount, 0)
 
   return (
-    <DashboardPage>
+    <DashboardPage error={error} onCloseError={() => setError('')}>
       <Heading mb='3'>Balance Sheet</Heading>
       <div className='mb-3'>
         <Text>Generated: {now}</Text>

@@ -56,12 +56,11 @@ const AdminDashboard = () => {
   }, [])
 
   return (
-    <DashboardPage isAdmin>
+    <DashboardPage isAdmin error={error} onCloseError={() => setError('')}>
       <Heading>Administrator Dashboard</Heading>
       <Heading as='h3' className='text-sm py-5'>
         Users
       </Heading>
-      {error && <p className='text-red-500 text-sm'>{error}</p>}
       <Table.Root variant='surface'>
         <Table.Header>
           <Table.Row>

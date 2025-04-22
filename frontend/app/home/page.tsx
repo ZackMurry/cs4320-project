@@ -6,8 +6,6 @@ import Link from 'next/link'
 import { useState } from 'react'
 
 const IFinanceDashboard = () => {
-  const [error, setError] = useState<string>('')
-
   return (
     <DashboardPage>
       <Heading>iFINANCE User Dashboard</Heading>
@@ -63,7 +61,6 @@ const IFinanceDashboard = () => {
           </Link>
         </Card>
       </Box>
-      {error && <p className='text-red-500 text-sm'>{error}</p>}
     </DashboardPage>
   )
 }
