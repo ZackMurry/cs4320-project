@@ -168,7 +168,6 @@ const ManageAccountGroups = () => {
     }
     return categories.findLast((c) => `category-${c.ID}` === selectedItemId)
   }, [selectedItemId, groups, categories])
-  console.log(tree)
 
   return (
     <DashboardPage error={error} onCloseError={() => setError('')}>

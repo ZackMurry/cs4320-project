@@ -3,7 +3,6 @@
 import DashboardPage from '@/components/DashboardPage'
 import { Box, Card, Flex, Heading, Text } from '@radix-ui/themes'
 import Link from 'next/link'
-import { useState } from 'react'
 
 const IFinanceDashboard = () => {
   return (

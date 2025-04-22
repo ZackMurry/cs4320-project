@@ -1,7 +1,7 @@
 'use client'
 
 import DashboardPage from '@/components/DashboardPage'
-import { Button, Heading, Select, Text, TextField } from '@radix-ui/themes'
+import { Button, Heading, Select, TextField } from '@radix-ui/themes'
 import * as Form from '@radix-ui/react-form'
 import { FC, FormEvent, useState } from 'react'
 
@@ -97,7 +97,10 @@ const AdminDashboard: FC = () => {
             </Form.Label>
             <div>
               <Form.Control asChild>
-                <Select.Root value={role} onValueChange={(val) => setRole(val)}>
+                <Select.Root
+                  value={role}
+                  onValueChange={(val) => setRole(val as 'user' | 'admin')}
+                >
                   <Select.Trigger className='!w-full' />
                   <Select.Content>
                     <Select.Item value='user'>User</Select.Item>

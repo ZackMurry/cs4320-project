@@ -1,11 +1,6 @@
 'use client'
 
-import {
-  CheckCircle,
-  LayoutDashboard,
-  BookOpenCheck,
-  Fingerprint,
-} from 'lucide-react'
+import { LayoutDashboard, BookOpenCheck, Fingerprint } from 'lucide-react'
 import * as framerMotion from 'framer-motion'
 import { Heading, Text, Button, Card, Inset } from '@radix-ui/themes'
 import '@radix-ui/themes/styles.css'

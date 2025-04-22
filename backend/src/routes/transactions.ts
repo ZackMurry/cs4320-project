@@ -13,9 +13,6 @@ import { recalculateClosingAmount } from '../util/recalculateClosingAmount.js'
 
 const router = express.Router()
 
-const groupRepository = db.getRepository(AccountGroup)
-const categoryRepository = db.getRepository(AccountingCategory)
-const userRepository = db.getRepository(NonAdminUser)
 const accountRepository = db.getRepository(MasterAccount)
 const txnRepository = db.getRepository(Transaction)
 const txnLineRepository = db.getRepository(TransactionLine)

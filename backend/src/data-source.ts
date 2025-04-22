@@ -11,13 +11,19 @@ import { TransactionLine } from './entity/TransactionLine.js'
 
 console.log('Initializing data source...')
 
+const { POSTGRES_USERNAME, POSTGRES_PASSWORD, POSTGRES_DATABASE } = process.env
+if (!POSTGRES_USERNAME || !POSTGRES_PASSWORD || !POSTGRES_DATABASE) {
+  console.error('Postgres credentials not defined!')
+  process.exit(1)
+}
+
 export const db = new DataSource({
   type: 'postgres',
   host: 'localhost',
   port: 5432,
-  username: 'postgres',
-  password: 'greSQLdb',
-  database: 'group14_ifinancedb',
+  username: POSTGRES_USERNAME,
+  password: POSTGRES_PASSWORD,
+  database: POSTGRES_DATABASE,
   synchronize: true,
   logging: true,
   entities: [
