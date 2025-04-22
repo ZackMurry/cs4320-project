@@ -1,7 +1,7 @@
 'use client'
 
 import DashboardPage from '@/components/DashboardPage'
-import { Button, Heading, TextField } from '@radix-ui/themes'
+import { Button, Heading, Select, Text, TextField } from '@radix-ui/themes'
 import * as Form from '@radix-ui/react-form'
 import { FC, FormEvent, useState } from 'react'
 
@@ -40,6 +40,8 @@ const AdminDashboard: FC = () => {
     address: '',
   })
 
+  const [role, setRole] = useState<'user' | 'admin'>('user')
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({
@@ -52,13 +54,23 @@ const AdminDashboard: FC = () => {
     e.preventDefault()
     console.log('submit')
     try {
-      const response = await fetch('/api/v1/users', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `/api/v1/users${role === 'admin' ? '/admins' : ''}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body:
+            role === 'user'
+              ? JSON.stringify(formData)
+              : JSON.stringify({
+                  username: formData.username,
+                  password: formData.password,
+                  name: formData.name,
+                }), // Send data as JSON
         },
-        body: JSON.stringify(formData), // Send data as JSON
-      })
+      )
 
       if (response.ok) {
         console.log('User created successfully')
@@ -77,7 +89,24 @@ const AdminDashboard: FC = () => {
     <DashboardPage isAdmin>
       <div className='mx-auto max-w-[500px]'>
         <Heading className='py-5'>Create New User</Heading>
+
         <Form.Root onSubmit={handleSubmit} action='/api/v1/users' method='POST'>
+          <Form.Field name='role' className='my-3'>
+            <Form.Label className='capitalize'>
+              Role <span className='text-red-500'>*</span>
+            </Form.Label>
+            <div>
+              <Form.Control asChild>
+                <Select.Root value={role} onValueChange={(val) => setRole(val)}>
+                  <Select.Trigger className='!w-full' />
+                  <Select.Content>
+                    <Select.Item value='user'>User</Select.Item>
+                    <Select.Item value='admin'>Admin</Select.Item>
+                  </Select.Content>
+                </Select.Root>
+              </Form.Control>
+            </div>
+          </Form.Field>
           <FormEntry name='username' isRequired onChange={handleChange} />
           <FormEntry
             name='password'
@@ -86,11 +115,15 @@ const AdminDashboard: FC = () => {
             onChange={handleChange}
           />
           <FormEntry name='name' isRequired onChange={handleChange} />
-          <FormEntry name='email' type='email' onChange={handleChange} />
-          <FormEntry name='address' onChange={handleChange} />
+          {role === 'user' && (
+            <>
+              <FormEntry name='email' type='email' onChange={handleChange} />
+              <FormEntry name='address' onChange={handleChange} />
+            </>
+          )}
           <Form.Submit asChild>
             <Button className='!w-full !mt-5' type='submit'>
-              Create user
+              Create {role}
             </Button>
           </Form.Submit>
         </Form.Root>

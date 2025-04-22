@@ -18,7 +18,7 @@ const adminRepository = db.getRepository(Administrator)
 const bcryptSaltRounds = 10
 
 router.post('/', async (req, res) => {
-  if (req.session.profile?.username !== 'admin') {
+  if (req.session.profile?.role !== 'ADMIN') {
     res.sendStatus(403) // Only the admin user is authorized
     return
   }
@@ -399,6 +399,48 @@ router.put('/id/:id', withAuth, async (req, res) => {
   u.address = address || null
   await nonAdminRepository.save(u)
 
+  res.sendStatus(200)
+})
+
+router.post('/admins', withAuth, async (req, res) => {
+  if (req.session.profile?.role !== 'ADMIN') {
+    res.sendStatus(403) // Only the admin user is authorized
+    return
+  }
+  const adminID = req.session.profile?.ID
+  if (adminID === undefined || adminID === null) {
+    res.sendStatus(403)
+    return
+  }
+  const username = req.body.username
+  const password = req.body.password
+  const name = req.body.name
+
+  if (!username || username.length < 3 || username.length > 24) {
+    res.sendStatus(400)
+    return
+  }
+  if (!password || password.length < 5 || password.length > 24) {
+    res.sendStatus(400)
+    return
+  }
+  const admin = new Administrator()
+  admin.name = name
+  admin.password = new UserPassword()
+
+  admin.type = EUserType.ADMIN
+  admin.password.encryptedPassword = await bcrypt.hash(
+    password,
+    bcryptSaltRounds,
+  )
+  admin.password.userName = username
+  const passwordExpiryDate = new Date()
+  passwordExpiryDate.setMonth(passwordExpiryDate.getMonth() + 6)
+  admin.password.passwordExpiryTime = 60 * 60 * 24 * 7 // Require new signin after 1 week
+  const accountExpiryDate = new Date()
+  accountExpiryDate.setFullYear(accountExpiryDate.getFullYear() + 10)
+  admin.password.userAccountExpiryDate = accountExpiryDate // Expire in 10 years
+  await adminRepository.save(admin)
   res.sendStatus(200)
 })
 
