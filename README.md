@@ -14,7 +14,9 @@ This software setup is required for running the web server. Versions do not have
 - PostgreSQL version 17.2
 - Linux (may work on other operating systems)
 
-For ease of use, we have deployed the website on the cloud for testing at this domain: TODO
+For ease of use, we have deployed the website on the cloud for testing at this IP: TODO
+
+- Please don't change the default admin username or password on our hosted instance
 
 ## Setup
 
