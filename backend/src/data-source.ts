@@ -17,6 +17,7 @@ if (!POSTGRES_USERNAME || !POSTGRES_PASSWORD || !POSTGRES_DATABASE) {
   process.exit(1)
 }
 
+// Configure data source
 export const db = new DataSource({
   type: 'postgres',
   host: 'localhost',

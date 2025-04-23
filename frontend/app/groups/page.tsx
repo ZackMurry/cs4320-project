@@ -33,8 +33,6 @@ const ManageAccountGroups = () => {
     e: React.MouseEvent<HTMLLIElement, MouseEvent>,
     itemId: string,
   ) => {
-    // e.preventDefault()
-    // e.stopPropagation()
     if (new Date().getTime() - clickTime < 300) {
       return
     }
@@ -43,6 +41,7 @@ const ManageAccountGroups = () => {
     clickTime = new Date().getTime()
   }
 
+  // Make a tree of groups based on parent IDs
   const buildTree = (groups: Group[], categories: Category[]) => {
     const nodes: CategoryTree[] = []
     for (const category of categories) {
@@ -61,7 +60,6 @@ const ManageAccountGroups = () => {
           console.error('Could not build group tree!')
           continue
         }
-        console.log('adding to category', catNode.ID)
         const newNode = {
           ...group,
           id: `group-${group.ID}`,
@@ -79,7 +77,7 @@ const ManageAccountGroups = () => {
           continue
         }
         if (!group.parentID) {
-          console.error('Could not build group tree!')
+          setError('Could not build group tree!')
           return
         }
         const parentNode = matched[group.parentID]

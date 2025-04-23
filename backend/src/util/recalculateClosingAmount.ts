@@ -3,6 +3,7 @@ import { ECategoryType } from '../entity/AccountingCategory.js'
 import { MasterAccount } from '../entity/MasterAccount.js'
 import { EEntryType, TransactionLine } from '../entity/TransactionLine.js'
 
+// Update closing amount field for account based on all relevant transaction lines
 export async function recalculateClosingAmount(accountId: number) {
   await new Promise((res) => setTimeout(res, 50)) // give the database time to commit
   const accountRepository = db.getRepository(MasterAccount)
@@ -23,6 +24,7 @@ export async function recalculateClosingAmount(accountId: number) {
     where: { accountID: accountId },
   })
 
+  // Calculate net change from opening amount
   const netAmount = lines.reduce((sum, line) => {
     const amount = parseFloat(line.amount.toString())
     const isLineDebit = line.type === EEntryType.DEBIT

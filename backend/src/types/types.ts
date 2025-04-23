@@ -1,5 +1,6 @@
 import 'express-session'
 
+// Custom express session types
 declare module 'express-session' {
   interface SessionData {
     profile?: {
@@ -10,6 +11,7 @@ declare module 'express-session' {
   }
 }
 
+// Non admin profile
 export interface NonAdminProfile {
   userName: string
   password?: string

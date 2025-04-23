@@ -7,53 +7,62 @@ import { NonAdminUser } from '../entity/NonAdminUser.js'
 
 const router = express.Router()
 
+// Load repositories for relevant tables
 const groupRepository = db.getRepository(AccountGroup)
 const categoryRepository = db.getRepository(AccountingCategory)
 const userRepository = db.getRepository(NonAdminUser)
 
+// Get all groups
 router.get('/', withUserAuth, async (req, res) => {
+  // Ensure user is authenticated
   if (!req.session.profile) {
     res.sendStatus(401)
     return
   }
   const userId = req.session.profile.ID
+  // Get top-level categories
   const categories = await categoryRepository.find()
   if (!categories) {
     console.error('Could not find any categories!')
     res.sendStatus(500)
     return
   }
+  // Get the user's groups
   const groups = await groupRepository.find({
     where: { user: { ID: userId } },
   })
   res.json({ categories, groups })
 })
 
+// Create a group
 router.post('/', withUserAuth, async (req, res) => {
+  // Ensure user is authenticated
   if (!req.session.profile) {
     res.sendStatus(401)
     return
   }
   const userId = req.session.profile.ID
+  // Get details from body
   const name = req.body.name
   const category = req.body.category
   const parent = req.body.parent
-  console.log(req.body)
 
+  // Validate name
   if (!name || name.length > 256) {
     res.sendStatus(400)
     return
   }
 
+  // Find user entity in database
   const owner = await userRepository.findOneBy({ ID: userId })
   if (!owner) {
     res.sendStatus(401)
     return
   }
 
+  // If the parent group is specified, find the parentGroup
   let parentGroup = null
   if (parent) {
-    console.log('Using parent for group', parent)
     parentGroup = await groupRepository.findOne({
       where: { ID: parent },
       relations: ['category'],
@@ -82,27 +91,33 @@ router.post('/', withUserAuth, async (req, res) => {
     }
   }
 
+  // Create group entity
   const ag = new AccountGroup()
   ag.category = cat ?? parentGroup!.category
   ag.user = owner
   ag.name = name
   ag.parent = parentGroup
+  // Save entity in database
   await groupRepository.save(ag)
 
   res.json(ag)
 })
 
+// Delete group by ID
 router.delete('/id/:id', withUserAuth, async (req, res) => {
+  // Ensure user is authenticated
   if (!req.session.profile) {
     res.sendStatus(401)
     return
   }
   const userId = req.session.profile.ID
+  // Parse group ID from path
   const id = Number.parseInt(req.params.id)
   if (!id) {
     res.sendStatus(400)
     return
   }
+  // Ensure the group exists and is owned by the user
   const exists = await groupRepository.existsBy({
     ID: id,
     user: { ID: userId },
@@ -111,21 +126,26 @@ router.delete('/id/:id', withUserAuth, async (req, res) => {
     res.sendStatus(404)
     return
   }
+  //  Delete the group in the database
   await groupRepository.delete(id)
   res.sendStatus(200)
 })
 
+// Update the group with the given ID
 router.put('/id/:id', withUserAuth, async (req, res) => {
+  // Ensure the user is authenticated
   if (!req.session.profile) {
     res.sendStatus(401)
     return
   }
   const userId = req.session.profile.ID
+  // Parse group ID from path
   const id = Number.parseInt(req.params.id)
   if (!id) {
     res.sendStatus(400)
     return
   }
+  // Find group by ID owned by user
   const group = await groupRepository.findOneBy({
     ID: id,
     user: { ID: userId },
@@ -135,12 +155,14 @@ router.put('/id/:id', withUserAuth, async (req, res) => {
     return
   }
 
+  // Get name from body and validate it
   const name = req.body.name
   if (!name || name.length > 256) {
     res.sendStatus(400)
     return
   }
   group.name = name
+  // Save the group in the database
   await groupRepository.save(group)
   res.sendStatus(200)
 })

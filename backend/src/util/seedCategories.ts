@@ -4,6 +4,7 @@ import {
   ECategoryType,
 } from '../entity/AccountingCategory.js'
 
+// Create four base accounting categories if they don't exist
 const seedCategories = async () => {
   const categoryRepository = db.getRepository(AccountingCategory)
   const count = await categoryRepository.count()

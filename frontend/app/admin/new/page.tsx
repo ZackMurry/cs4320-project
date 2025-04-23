@@ -73,15 +73,12 @@ const AdminDashboard: FC = () => {
       )
 
       if (response.ok) {
-        console.log('User created successfully')
-        // You can handle the success response here (e.g., redirect, show message)
         window.location.reload()
       } else {
         setError('Error creating user')
-        // Handle error response here
       }
     } catch (error) {
-      console.error('Request failed', error)
+      setError('Request failed' + error)
     }
   }
 
