@@ -14,8 +14,8 @@ Group 14 members: Zack Murry, Mike Huber, Jacob York, and Jagger Schmitz
   - [ER Diagram](#er-diagram)
   - [Further Table Details](#further-table-details)
 - [Overview of Tools](#overview-of-tools)
-  - [Next.js](#next.js)
-  - [Express.js](#express.js)
+  - [Next.js](#nextjs)
+  - [Express.js](#expressjs)
   - [NGINX](#nginx)
 
 ## Requirements
