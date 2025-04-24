@@ -4,6 +4,16 @@ Spring 2025 Software Engineering with Dr. Ouda
 
 Group 14 members: Zack Murry, Mike Huber, Jacob York, and Jagger Schmitz
 
+## Contents
+
+- [Requirements](#requirements)
+- [Setup](#setup)
+- [Execution](#execution)
+- [Project Structure](#project-structure)
+- [SQL Database Tables](#sql-database-tables)
+  - [ER Diagram](#er-diagram)
+  - [Further Table Details](#further-table-details)
+
 ## Requirements
 
 This software setup is required for running the web server. Versions do not have to be exact.
