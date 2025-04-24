@@ -36,3 +36,91 @@ The processes started by this script include:
 
 The script can be run using `bash start.sh`.
 The server can be terminated by exiting from the `start.sh` script.
+
+## Project Structure
+
+```
+# Base directory for frontend React/Next.js application
+/frontend
+  # Contains files that will be served at a specific route based on
+  # the folders it is in
+  /app
+    page.tsx # Page served at / (equivalent to index.html)
+    layout.tsx # Component that specifies a template for all pages
+    globals.css # Global Cascading Style Sheets (CSS) styles
+    favicon.ico # Favicon for website (default)
+    /accounts/page.tsx # Page served at /accounts for managing master accounts
+    /admin # Directory for admin dashboard
+      page.tsx # Page served at /admin for the admin dashboard
+      /edit/page.tsx # Page served at /admin/edit for editing the admin's profile
+      /new/page.tsx # Page served at /admin/new for creating users
+      /users/[id]/page.tsx # Page served at /admin/users/[id] for editing the user with a given ID
+    /groups # Directory for managing account groups
+      page.tsx # Page served at /groups for managing account groups
+      styles.css # CSS styles for the /groups page
+    /home/page.tsx Page served at /home as the user's dashboard
+    /login/page.tsx # Page served at /login for signing in
+    /password/page.tsx # Page served at /password for changing a user's password
+    /reports # Directory for generating reports
+      page.tsx # Page served at /reports that directs to other report pages
+      /balance-sheet/page.tsx # Page served at /reports/balance-sheet for generating balance sheets
+      /profit-loss/page.tsx # Page served at /reports/profit-loss for generating profit and loss statements
+      /trial-balance/page.tsx # Page served at /reports/trial-balance for generating trial balance reports
+    /transactions # Directory for managing financial transactions use case
+      page.tsx # Page served at /transactions that displays all transactions
+      /[id]/page.tsx # Page served at /transactions/[id] that displays the transaction with the given ID
+  /components # Directory for React components to be used on pages
+    /dialog # Directory for pop-up dialogs for creating, updating, and deleting entities
+      AddAccountDialog.tsx # Dialog for adding a master account
+      AddGroupDialog.tsx # Dialog for adding an account group
+      AddTransactionDialog.tsx # Dialog for adding a transaction
+      AddTransactionLineDialog.tsx # Dialog for adding a transaction line
+      DeleteGroupDialog.tsx # Dialog for deleting an account group
+      EditAccountDialog.tsx # Dialog for editing an account group
+      EditTransactionDialog.tsx # Dialog for editing a transaction
+      EditTransactionLineDialog.tsx # Dialog for editing a transaction line
+      RenameGroupDialog.tsx # Dialog for renaming an account group
+    AdminHeader.tsx # Top header for the admin portal
+    DashboardPage.tsx # Generic dashboard page template (wraps most pages)
+    ErrorToast.tsx # Bottom-right error popup component
+    FormEntry.tsx # Highly configurable form field component
+    Header.tsx # Top header for non-admin portal
+  /lib # Directory for non-React files
+    types.ts # Custom type definitions (domain-specific types)
+  package.json # Node.js dependencies and configuration
+  tsconfig.json # TypeScript configuration
+
+/backend
+  /src # Directory for source code
+    /entity # Directory for defining database tables using TypeORM
+      AccountGroup.ts # account_group table definition
+      AccountingCategory.ts # accounting_category table definition
+      Administrator.ts # administrator table definition
+      iFINANCEUser.ts # ifinance_user table definition
+      MasterAccount.ts # master_account table definition
+      NonAdminUser.ts # non_admin_user table definition
+      Transaction.ts # transaction table definition
+      TransactionLine.ts # transaction_line table definition
+      UserPassword.ts # user_password table definition
+    /middleware # Directory for Express.js middleware
+      withAuth.ts # Middleware to ensure that the user has a valid session
+      withUserAuth.ts # Middleware to enusre that the user has a valid non-admin session
+    /routes # Directory for defining HTTP routes using Express.js
+      accounts.ts # Routes at /api/v1/accounts
+      groups.ts # Routes at /api/v1/groups
+      transactions.ts # Routes at /api/v1/transactions
+      users.ts # Routes at /api/v1/users
+    /types/types.ts # File for defining custom types
+    /util # Directory for storing functionality to be used by routes
+      recalculateClosingAmount.ts # Re-calculates the closing amount for a given account
+      seedCategories.ts # Creates the four main accounting categories in the database
+    app.ts # Entrypoint for the backend
+    data-source.ts # Database configuraiton
+  .env.example # Example .env configuration file
+  package.json # Node.js dependencies and configuration
+  tsconfig.json # TypeScript configuration
+
+/nginx/conf/nginx.conf # NGINX reverse-proxy configuration file
+
+start.sh # File to install, build, and start web server
+```
