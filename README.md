@@ -9,6 +9,7 @@ Group 14 members: Zack Murry, Mike Huber, Jacob York, and Jagger Schmitz
 **GitHub link**: https://github.com/ZackMurry/cs4320-project
 
 ![Screenshot of landing page](screenshot.png)
+![Demo video](demo.mp4)
 
 ## Contents
 
