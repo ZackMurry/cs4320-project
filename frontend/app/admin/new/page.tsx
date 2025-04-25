@@ -5,6 +5,7 @@ import { Button, Heading, Select, TextField } from '@radix-ui/themes'
 import * as Form from '@radix-ui/react-form'
 import { FC, FormEvent, useState } from 'react'
 
+// Template for a text field in a form
 const FormEntry: FC<{
   isRequired?: boolean
   name: string
@@ -31,7 +32,9 @@ const FormEntry: FC<{
   </Form.Field>
 )
 
-const AdminDashboard: FC = () => {
+// Page to create new users
+const NewUserPage: FC = () => {
+  // Declare persistent variables
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -42,6 +45,7 @@ const AdminDashboard: FC = () => {
   const [role, setRole] = useState<'user' | 'admin'>('user')
   const [error, setError] = useState('')
 
+  // Update formData with changed data
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({
@@ -50,6 +54,7 @@ const AdminDashboard: FC = () => {
     }))
   }
 
+  // Send request to backend to create a user
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     console.log('submit')
@@ -132,4 +137,4 @@ const AdminDashboard: FC = () => {
   )
 }
 
-export default AdminDashboard
+export default NewUserPage

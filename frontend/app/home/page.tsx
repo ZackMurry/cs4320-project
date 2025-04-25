@@ -4,6 +4,7 @@ import DashboardPage from '@/components/DashboardPage'
 import { Box, Card, Flex, Heading, Text } from '@radix-ui/themes'
 import Link from 'next/link'
 
+// Non-admin user dashboard
 const IFinanceDashboard = () => {
   return (
     <DashboardPage>

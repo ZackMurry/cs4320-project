@@ -13,12 +13,16 @@ const fmt = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 2,
 })
 
+// Page to generate a trial balance
 const TrialBalancePage = () => {
+  // Declare persistent variables
   const [error, setError] = useState<string>('')
   const [accounts, setAccounts] = useState<FullMasterAccount[]>([])
   const [now, setNow] = useState<string>('')
 
+  // useEffect runs on the first render
   useEffect(() => {
+    // Get accounts from backend
     const fetchAccounts = async () => {
       const res = await fetch('/api/v1/accounts')
       if (res.ok) {
@@ -29,9 +33,11 @@ const TrialBalancePage = () => {
       }
     }
     fetchAccounts()
+    // Set generated time to now
     setNow(new Date().toLocaleString())
   }, [])
 
+  // Sum all accounts in a category, and flip the type and sign if it is negative
   const sumType = (acType: CategoryType, otherType: CategoryType) =>
     accounts.reduce((accumulator, account) => {
       const dAmount = account.closingAmount - account.openingAmount
@@ -49,6 +55,7 @@ const TrialBalancePage = () => {
       return accumulator
     }, 0)
 
+  // Calculate debit and credit totals
   const totalDebit = sumType('DEBIT', 'CREDIT')
   const totalCredit = sumType('CREDIT', 'DEBIT')
 

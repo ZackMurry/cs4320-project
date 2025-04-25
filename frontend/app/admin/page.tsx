@@ -13,15 +13,19 @@ import {
 import { Edit, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
+// Page to view all users managed by the admin
 const AdminDashboard = () => {
+  // Declare persistent variables
   const [users, setUsers] = useState<NonAdminUser[] | null>(null)
   const [selectedUser, setSelectedUser] = useState<NonAdminUser | null>(null)
   const [error, setError] = useState<string>('')
 
+  // Set the user context to the clicked user
   const handleDeleteClick = (u: NonAdminUser) => {
     setSelectedUser(u)
   }
 
+  // Send request to backend to delete the selected user
   const confirmDelete = async () => {
     if (!selectedUser) {
       setError('No user selected for deletion')
@@ -38,18 +42,21 @@ const AdminDashboard = () => {
     }
   }
 
+  // Redirect to edit user page
   const editUser = (u: NonAdminUser) => {
     window.location.href = '/admin/users/' + u.ID
   }
 
+  // useEffect is run on the first render
   useEffect(() => {
+    // Get all users from database
     const fetchUsers = async () => {
       const res = await fetch('/api/v1/users')
       if (res.ok) {
         const data = (await res.json()) as NonAdminUser[]
         setUsers(data)
       } else {
-        console.error('Error fetching users!')
+        setError('Error fetching users!')
       }
     }
     fetchUsers()

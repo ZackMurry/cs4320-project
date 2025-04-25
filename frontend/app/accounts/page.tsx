@@ -3,8 +3,6 @@ import AddAccountDialog from '@/components/dialog/AddAccountDialog'
 import DashboardPage from '@/components/DashboardPage'
 import EditAccountDialog from '@/components/dialog/EditAccountDialog'
 import {
-  Category,
-  Group,
   GroupTreeResponse,
   MasterAccountResponse,
   NamedGroup,
@@ -19,46 +17,11 @@ import {
 } from '@radix-ui/themes'
 import { Edit, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import buildGroupArray from '@/lib/buildGroupArray'
 
-const buildGroupArray = (
-  groups: Group[],
-  categories: Category[],
-): NamedGroup[] => {
-  const categoryMap = new Map<number, string>()
-  categories.forEach((cat) => {
-    categoryMap.set(cat.ID, cat.name)
-  })
-
-  const groupMap = new Map<number, Group>()
-  groups.forEach((group) => {
-    groupMap.set(group.ID, group)
-  })
-
-  const getFullName = (group: Group): string => {
-    const names: string[] = []
-    let current: Group | undefined = group
-
-    while (current) {
-      names.unshift(current.name)
-      current =
-        current.parentID !== null ? groupMap.get(current.parentID) : undefined
-    }
-
-    const rootCategory = categoryMap.get(group.categoryID)
-    if (rootCategory) {
-      names.unshift(rootCategory)
-    }
-
-    return names.join(`\\`)
-  }
-
-  return groups.map((group) => ({
-    id: group.ID,
-    fullName: getFullName(group),
-  }))
-}
-
+// Page for managing chart of accounts
 const ManageChartOfAccounts = () => {
+  // Persistent variables
   const [error, setError] = useState('')
   const [dialog, setDialog] = useState<'add' | 'edit' | null>(null)
   const [groups, setGroups] = useState<NamedGroup[]>([])
@@ -66,11 +29,14 @@ const ManageChartOfAccounts = () => {
   const [selectedAccount, setSelectedAccount] =
     useState<MasterAccountResponse | null>(null)
 
+  // useEffect runs only on the first render
   useEffect(() => {
+    // Fetch groups from the backend
     const fetchGroups = async () => {
       const res = await fetch('/api/v1/groups')
       if (res.ok) {
         const { groups, categories } = (await res.json()) as GroupTreeResponse
+        // Build group array with full names, and then sort in alphabetical order
         const groupList = buildGroupArray(groups, categories).sort((a, b) =>
           a.fullName.localeCompare(b.fullName),
         )
@@ -81,6 +47,7 @@ const ManageChartOfAccounts = () => {
     }
     fetchGroups()
 
+    // Fetch accounts from the backend
     const fetchAccounts = async () => {
       const res = await fetch('/api/v1/accounts')
       if (res.ok) {
@@ -91,9 +58,11 @@ const ManageChartOfAccounts = () => {
     fetchAccounts()
   }, [])
 
+  // Update accounts to include a new account
   const handleAdd = (a: MasterAccountResponse) => {
     setAccounts((acs) => [...(acs ?? []), a])
   }
+  // Modify the details of one account
   const handleEdit = (a: MasterAccountResponse) => {
     if (!accounts) {
       setAccounts([a])
@@ -106,21 +75,25 @@ const ManageChartOfAccounts = () => {
     setSelectedAccount(null)
   }
 
+  // Opens the edit dialog with the context of the current account
   const handleEditAccount = (act: MasterAccountResponse) => {
     setSelectedAccount(act)
     setDialog('edit')
   }
 
+  // Opens the delete dialog with the context of the current account
   const handleDeleteAccount = (act: MasterAccountResponse) => {
     setSelectedAccount(act)
   }
 
+  // Delete account
   const confirmDelete = async () => {
     if (!accounts || !selectedAccount) {
       setError('Failed to delete account: no account selected.')
       setSelectedAccount(null)
       return
     }
+    // Send request to backend
     const res = await fetch(`/api/v1/accounts/id/${selectedAccount.ID}`, {
       method: 'DELETE',
     })
@@ -203,6 +176,7 @@ const ManageChartOfAccounts = () => {
               accounts
                 .sort((a, b) => a.ID - b.ID)
                 .map((a) => (
+                  // render each row in the table
                   <Table.Row key={a.ID}>
                     <Table.RowHeaderCell>{a.ID}</Table.RowHeaderCell>
                     <Table.RowHeaderCell>{a.name}</Table.RowHeaderCell>

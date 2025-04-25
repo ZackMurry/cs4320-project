@@ -6,14 +6,17 @@ import * as Form from '@radix-ui/react-form'
 import { FC, FormEvent, useState } from 'react'
 import FormEntry from '@/components/FormEntry'
 
+// Page to change the current user's password
 const ChangePasswordPage: FC = () => {
+  // Declare persistent variables
   const [password, setPassword] = useState({ value: '', modified: false })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  // Submit the new password to the backend
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    console.log('submit')
+    // Validate password
     if (
       password.modified &&
       password.value.length &&
@@ -22,6 +25,7 @@ const ChangePasswordPage: FC = () => {
       setError('Invalid password length')
       return
     }
+    // If no change, don't transmit
     if (!password.modified) {
       return
     }
@@ -45,7 +49,7 @@ const ChangePasswordPage: FC = () => {
       }
       setLoading(false)
     } catch (error) {
-      console.error('Request failed', error)
+      setError('Request failed' + error)
     }
   }
 
