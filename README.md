@@ -4,6 +4,9 @@ Spring 2025 Software Engineering with Dr. Ouda
 
 Group 14 members: Zack Murry, Mike Huber, Jacob York, and Jagger Schmitz
 
+**Demo video**: demo.mp4  
+**Live deployment**: https://ifinance.zackmurry.com
+
 ## Contents
 
 - [Requirements](#requirements)
