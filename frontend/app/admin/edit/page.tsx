@@ -7,12 +7,15 @@ import { FC, FormEvent, useEffect, useState } from 'react'
 import { AdminProfile } from '@/lib/types'
 import FormEntry from '@/components/FormEntry'
 
+// Page to edit admin credentials
 const EditAdminPage: FC = () => {
+  // Declare persistent variables
   const [user, setUser] = useState<AdminProfile | null>(null)
   const [password, setPassword] = useState({ value: '', modified: false })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  // Update the admin user with the new form information
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     // @ts-expect-error Form types
@@ -22,6 +25,7 @@ const EditAdminPage: FC = () => {
     }))
   }
 
+  // Send new details to backend
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     console.log('submit')
@@ -66,7 +70,9 @@ const EditAdminPage: FC = () => {
     }
   }
 
+  // useEffect runs on the first render
   useEffect(() => {
+    // Fetch user information from backend
     const fetchUser = async () => {
       const res = await fetch('/api/v1/users/me')
       if (res.ok) {

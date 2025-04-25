@@ -8,13 +8,16 @@ import { useParams } from 'next/navigation'
 import { NonAdminEntity } from '@/lib/types'
 import FormEntry from '@/components/FormEntry'
 
+// Edit a user with a given ID
 const AdminUserPage: FC = () => {
-  const params = useParams()
+  const params = useParams() // Get path parameters (namely, id of user)
+  // Declare persistent variables
   const [user, setUser] = useState<NonAdminEntity | null>(null)
   const [password, setPassword] = useState({ value: '', modified: false })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  // Update user information based on form changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     if (name === 'username') {
@@ -28,6 +31,7 @@ const AdminUserPage: FC = () => {
     }
   }
 
+  // Send request to backend with new user info
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     console.log('submit')
@@ -70,10 +74,11 @@ const AdminUserPage: FC = () => {
       }
       setLoading(false)
     } catch (error) {
-      console.error('Request failed', error)
+      setError('Request failed' + error)
     }
   }
 
+  // useEffect runs on the first render
   useEffect(() => {
     const fetchUser = async () => {
       const res = await fetch(`/api/v1/users/id/${params.id}`)

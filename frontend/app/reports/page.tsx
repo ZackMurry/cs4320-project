@@ -3,6 +3,7 @@
 import DashboardPage from '@/components/DashboardPage'
 import { Box, Card, Flex, Heading, Text } from '@radix-ui/themes'
 
+// Page that has links for generating the reports
 const ReportsPage = () => (
   <DashboardPage>
     <Heading>Generate Financial Reports</Heading>

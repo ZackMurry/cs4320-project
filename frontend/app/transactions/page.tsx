@@ -14,14 +14,18 @@ import { Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { MouseEvent, useEffect, useState } from 'react'
 
+// Page for managing all transactions
 const ManageTransactions = () => {
+  // Declare persistent variables
   const [error, setError] = useState('')
   const [dialog, setDialog] = useState<'add' | null>(null)
   const [transactions, setTransactions] = useState<Transaction[]>()
   const [selectedTxn, setSelectedTxn] = useState<Transaction | null>(null)
-  const router = useRouter()
+  const router = useRouter() // Use Next.js router for redirects
 
+  // useEffect runs on the first render
   useEffect(() => {
+    // Get transactions from the backend
     const fetchTransactions = async () => {
       const res = await fetch('/api/v1/transactions')
       if (res.ok) {
@@ -32,25 +36,30 @@ const ManageTransactions = () => {
     fetchTransactions()
   }, [])
 
+  // Add a transaction to the UI
   const handleAdd = (t: Transaction) => {
     setTransactions((txns) => [...(txns ?? []), t])
   }
 
+  // Remove a transaction from the UI
   const handleDeleteTransaction = (e: MouseEvent, txn: Transaction) => {
     e.stopPropagation()
     setSelectedTxn(txn)
   }
 
+  // Delete a transaction from the database
   const confirmDelete = async () => {
     if (!transactions || !selectedTxn) {
       setError('Failed to delete transaction: no transaction selected.')
       setSelectedTxn(null)
       return
     }
+    // Send the request to delete
     const res = await fetch(`/api/v1/transactions/id/${selectedTxn.ID}`, {
       method: 'DELETE',
     })
     if (res.ok) {
+      // Remove transaction from UI
       const newTxns = [...transactions].filter((t) => t.ID !== selectedTxn.ID)
       setTransactions(newTxns)
     } else {
@@ -115,6 +124,7 @@ const ManageTransactions = () => {
               transactions
                 .sort((a, b) => a.ID - b.ID)
                 .map((t) => (
+                  // Render each row in the table
                   <Table.Row
                     onClick={() => router.push(`/transactions/${t.ID}`)}
                     className='cursor-pointer'

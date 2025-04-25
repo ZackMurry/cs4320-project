@@ -2,11 +2,14 @@
 import React, { useState } from 'react'
 import { TextField } from '@radix-ui/themes'
 
+// Login page for admins and non-admins
 const LogInPage: React.FC = () => {
+  // Declare persistent variables
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
 
+  // Submit login credentials to server
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
@@ -24,20 +27,18 @@ const LogInPage: React.FC = () => {
         throw new Error('Failed to log in. Please check your credentials.')
       }
 
-      console.log('auth worked!')
       if (window.location.search) {
         const redirectParam = new URLSearchParams(window.location.search).get(
           'redirect',
         )
-        console.log('redirect:', redirectParam)
+        // If there is a redirect returned
         if (redirectParam) {
-          window.location.href = redirectParam
+          window.location.href = redirectParam // Follow the redirect
         } else {
-          window.location.href = '/'
+          window.location.href = '/home' // Else go to user home page
         }
       } else {
-        // window.location.href = '/admin'
-        window.location.href = response.url
+        window.location.href = response.url // Else follow the provided URL
       }
 
       // Handle successful login

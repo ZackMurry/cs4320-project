@@ -4,13 +4,10 @@ import DashboardPage from '@/components/DashboardPage'
 import EditTransactionDialog from '@/components/dialog/EditTransactionDialog'
 import EditTransactionLineDialog from '@/components/dialog/EditTransactionLineDialog'
 import {
-  Category,
   FullTransaction,
-  Group,
   GroupTreeResponse,
   MasterAccountResponse,
   NamedAccount,
-  NamedGroup,
   Transaction,
   TransactionLine,
 } from '@/lib/types'
@@ -28,44 +25,7 @@ import {
 import { Edit, Info, Trash2 } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
-
-const buildGroupArray = (
-  groups: Group[],
-  categories: Category[],
-): NamedGroup[] => {
-  const categoryMap = new Map<number, string>()
-  categories.forEach((cat) => {
-    categoryMap.set(cat.ID, cat.name)
-  })
-
-  const groupMap = new Map<number, Group>()
-  groups.forEach((group) => {
-    groupMap.set(group.ID, group)
-  })
-
-  const getFullName = (group: Group): string => {
-    const names: string[] = []
-    let current: Group | undefined = group
-
-    while (current) {
-      names.unshift(current.name)
-      current =
-        current.parentID !== null ? groupMap.get(current.parentID) : undefined
-    }
-
-    const rootCategory = categoryMap.get(group.categoryID)
-    if (rootCategory) {
-      names.unshift(rootCategory)
-    }
-
-    return names.join(`\\`)
-  }
-
-  return groups.map((group) => ({
-    id: group.ID,
-    fullName: getFullName(group),
-  }))
-}
+import buildGroupArray from '@/lib/buildGroupArray'
 
 const fmt = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -74,16 +34,20 @@ const fmt = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 2,
 })
 
+// Page to manage a single transaction
 const ManageTransaction = () => {
-  const params = useParams()
+  const params = useParams() // Get params from path (namely the transaction ID)
 
+  // Declare persistent variables
   const [error, setError] = useState('')
   const [dialog, setDialog] = useState<'add' | 'edit' | 'details' | null>(null)
   const [accounts, setAccounts] = useState<NamedAccount[]>()
   const [selectedLine, setSelectedLine] = useState<TransactionLine | null>(null)
   const [transaction, setTransaction] = useState<FullTransaction>()
 
+  // useEffect runs on the first render
   useEffect(() => {
+    // Get transactions from backend
     const fetchTransaction = async () => {
       const res = await fetch(`/api/v1/transactions/id/${params.id}`)
       if (res.ok) {
@@ -95,17 +59,18 @@ const ManageTransaction = () => {
     }
     fetchTransaction()
 
+    // Get master accounts from backend
     const fetchAccounts = async () => {
       const res = await fetch('/api/v1/groups')
       if (res.ok) {
         const { groups, categories } = (await res.json()) as GroupTreeResponse
-        const groupList = buildGroupArray(groups, categories).sort((a, b) =>
-          a.fullName.localeCompare(b.fullName),
-        )
+        // Build group array to associate group IDs with their full names
+        const groupList = buildGroupArray(groups, categories)
         const aRes = await fetch('/api/v1/accounts')
         if (aRes.ok) {
           const acts = (await aRes.json()) as MasterAccountResponse[]
           const namedActs = []
+          // For each account, add the account ID and its full name to the namedActs list
           for (const act of acts) {
             namedActs.push({
               ID: act.ID,
@@ -124,13 +89,16 @@ const ManageTransaction = () => {
     fetchAccounts()
   }, [params])
 
+  // Update the transaction with the new details
   const handleDetailsEdit = (t: Transaction) => {
     if (!transaction) return
     setTransaction({ ...transaction, date: t.date, description: t.description })
   }
 
+  // Add a transaction line tp the transaction in the UI
   const handleAdd = (l: TransactionLine) => {
     if (!transaction) return
+    // Re-calculate total debit and credit
     const newTotalDebit =
       transaction.totalDebit + (l.type === 'DEBIT' ? l.amount : 0)
     const newTotalCredit =
@@ -143,6 +111,8 @@ const ManageTransaction = () => {
     })
     setSelectedLine(null)
   }
+
+  // Edit a transaction line in the UI
   const handleEdit = (l: TransactionLine) => {
     if (!transaction || !selectedLine) {
       return
@@ -153,7 +123,9 @@ const ManageTransaction = () => {
       transaction.totalDebit + (l.type === 'DEBIT' ? deltaAmt : 0)
     let newTotalCredit =
       transaction.totalCredit + (l.type === 'CREDIT' ? deltaAmt : 0)
+    // If the user changed the transaction line type (DEBIT <-> CREDIT)
     if (l.type !== selectedLine.type) {
+      // Recalculate debits and credits
       if (l.type === 'DEBIT') {
         newTotalDebit = transaction.totalDebit + l.amount
         newTotalCredit = transaction.totalCredit - selectedLine.amount
@@ -162,6 +134,7 @@ const ManageTransaction = () => {
         newTotalDebit = transaction.totalDebit - selectedLine.amount
       }
     }
+    // Find the transaction line
     const idx = transaction.lines.findIndex((tl) => tl.ID === l.ID)
     const newTxns = [...transaction.lines]
     newTxns[idx] = l
@@ -183,12 +156,14 @@ const ManageTransaction = () => {
     setSelectedLine(l)
   }
 
+  // Delete selected transaction line
   const confirmDelete = async () => {
     if (!transaction || !selectedLine) {
       setError('Failed to delete transaction line: no line selected.')
       setSelectedLine(null)
       return
     }
+    // Send request to server
     const res = await fetch(
       `/api/v1/transactions/lines/id/${selectedLine.ID}`,
       {
@@ -196,6 +171,7 @@ const ManageTransaction = () => {
       },
     )
     if (res.ok) {
+      // Update debits and credits in the UI
       const newTotalDebit =
         transaction.totalDebit -
         (selectedLine.type === 'DEBIT' ? selectedLine.amount : 0)
@@ -326,6 +302,7 @@ const ManageTransaction = () => {
               transaction.lines
                 .sort((a, b) => a.ID - b.ID)
                 .map((l) => (
+                  // Display a row for each transaction line
                   <Table.Row key={l.ID}>
                     <Table.RowHeaderCell>{l.ID}</Table.RowHeaderCell>
                     <Table.RowHeaderCell>

@@ -13,12 +13,16 @@ const fmt = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 2,
 })
 
+// Page for generating balance sheet reports
 const BalanceSheetPage = () => {
+  // Declare persistent variables
   const [error, setError] = useState<string>('')
   const [accounts, setAccounts] = useState<FullMasterAccount[]>([])
   const [now, setNow] = useState<string>('')
 
+  // useEffect runs on the first render
   useEffect(() => {
+    // Request accounts from backend
     const fetchAccounts = async () => {
       const res = await fetch('/api/v1/accounts')
       if (res.ok) {
@@ -29,14 +33,18 @@ const BalanceSheetPage = () => {
       }
     }
     fetchAccounts()
+    // Set current timestamp (for generated timestamp)
     setNow(new Date().toLocaleString())
   }, [])
 
+  // All assets
   const assets = accounts.filter((acc) => acc.group.category.name === 'Assets')
+  // All liabilities
   const liabilities = accounts.filter(
     (acc) => acc.group.category.name === 'Liabilities',
   )
 
+  // Function to sum closing amounts in a list of master accounts
   const total = (list: FullMasterAccount[]) =>
     list.reduce((sum, acc) => sum + acc.closingAmount, 0)
 

@@ -85,12 +85,5 @@ export default function LandingPage() {
         </Text>
       </footer>
     </main>
-    // <div className='min-h-screen bg-gray-200 flex flex-col'>
-    //   <div className='flex flex-col items-center justify-center flex-grow text-center p-6'>
-    //     <h1 className='text-5xl font-bold text-blue-700 mb-4'>iFINANCE</h1>
-    //     <a href='/login'>
-    //     </a>
-    //   </div>
-    // </div>
   )
 }
