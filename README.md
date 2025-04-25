@@ -101,6 +101,7 @@ The server can be terminated by exiting from the `start.sh` script.
     Header.tsx # Top header for non-admin portal
   /lib # Directory for non-React files
     types.ts # Custom type definitions (domain-specific types)
+    buildGroupArray.ts # Function to add the full names of each group at an array of groups
   package.json # Node.js dependencies and configuration
   tsconfig.json # TypeScript configuration
 
